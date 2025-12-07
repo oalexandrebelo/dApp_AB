@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { ArrowDownUp, Settings, ChevronDown, Wallet, RefreshCw, Info } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAccount, useWriteContract, useSwitchChain } from "wagmi";
-import { BRIDGE_ADDRESS, CROSS_CHAIN_BRIDGE_ABI, ERC20_ABI, ARC_TESTNET_CHAIN_ID } from "@/lib/contracts";
+import { BRIDGE_ADDRESS, CROSS_CHAIN_BRIDGE_ABI, ERC20_ABI, ARC_TESTNET_CHAIN_ID, USDC_ADDRESS } from "@/lib/contracts";
 
 export function BridgeWidget() {
     const { address, isConnected } = useAccount();
@@ -27,9 +27,9 @@ export function BridgeWidget() {
     // Token Locked to USDC
     const selectedToken = "USDC";
 
-    // Helper: Mock Address Mapper
+    // Helper: Address Mapper
     const getTokenAddress = () => {
-        return "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"; // USDC Address
+        return USDC_ADDRESS;
     };
 
     const handleTransfer = async () => {
