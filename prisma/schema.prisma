@@ -1,0 +1,1042 @@
+// ArcLend Protocol - Prisma Schema
+// Complete database schema for cross-chain lending protocol on Arc Network
+// Includes Circle Contracts and CCTP V2 integration
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// USER MANAGEMENT
+// ============================================
+
+model User {
+  id                String              @id @default(uuid())
+  address           String              @unique
+  email             String?             @unique
+  username          String?             @unique
+  
+  // User preferences
+  notificationsEnabled Boolean          @default(true)
+  emailVerified     Boolean             @default(false)
+  kycStatus         KYCStatus           @default(NOT_STARTED)
+  kycProvider       String?
+  kycVerifiedAt     DateTime?
+  
+  // User settings
+  defaultChain      Int                 @default(1) // chainId
+  defaultSlippage   Decimal             @default(0.5) @db.Decimal(5, 2)
+  autoCompound      Boolean             @default(false)
+  
+  // Timestamps
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  lastLoginAt       DateTime?
+  
+  // Relations
+  wallets           Wallet[]
+  positions         Position[]
+  transactions      Transaction[]
+  notifications     Notification[]
+  healthFactorAlerts HealthFactorAlert[]
+  referrals         Referral[]          @relation("Referrer")
+  referredBy        Referral?           @relation("Referred")
+  stakes            Stake[]
+  
+  @@index([address])
+  @@index([email])
+  @@map("users")
+}
+
+enum KYCStatus {
+  NOT_STARTED
+  PENDING
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+// ============================================
+// WALLET & CIRCLE INTEGRATION
+// ============================================
+
+model Wallet {
+  id                String              @id @default(uuid())
+  userId            String
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Wallet identification
+  address           String              @unique
+  chainId           Int
+  walletType        WalletType
+  
+  // Circle Wallet specific fields
+  circleWalletId    String?             @unique
+  circleEntityId    String?
+  isDevControlled   Boolean             @default(false)
+  
+  // Smart Contract Wallet specific
+  isSmartContract   Boolean             @default(false)
+  implementation    String?
+  
+  // Balances (cached)
+  nativeBalance     Decimal             @default(0) @db.Decimal(36, 18)
+  lastBalanceUpdate DateTime?
+  
+  // Timestamps
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  // Relations
+  tokenBalances     TokenBalance[]
+  positions         Position[]
+  transactions      Transaction[]
+  approvals         TokenApproval[]
+  
+  @@unique([userId, chainId])
+  @@index([address, chainId])
+  @@index([circleWalletId])
+  @@map("wallets")
+}
+
+enum WalletType {
+  EOA                   // Externally Owned Account
+  SMART_CONTRACT        // Smart Contract Wallet
+  CIRCLE_DEV_CONTROLLED // Circle Developer-Controlled Wallet
+  MULTISIG              // Multisig Wallet
+}
+
+model TokenBalance {
+  id                String              @id @default(uuid())
+  walletId          String
+  wallet            Wallet              @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  
+  tokenId           String
+  token             Token               @relation(fields: [tokenId], references: [id])
+  
+  balance           Decimal             @db.Decimal(36, 18)
+  lastUpdated       DateTime            @default(now())
+  
+  @@unique([walletId, tokenId])
+  @@index([walletId])
+  @@map("token_balances")
+}
+
+model TokenApproval {
+  id                String              @id @default(uuid())
+  walletId          String
+  wallet            Wallet              @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  
+  tokenId           String
+  token             Token               @relation(fields: [tokenId], references: [id])
+  
+  spender           String              // Contract address
+  amount            Decimal             @db.Decimal(36, 18)
+  
+  txHash            String
+  blockNumber       BigInt
+  
+  createdAt         DateTime            @default(now())
+  expiresAt         DateTime?
+  
+  @@unique([walletId, tokenId, spender])
+  @@index([walletId])
+  @@map("token_approvals")
+}
+
+// ============================================
+// TOKENS & MARKETS
+// ============================================
+
+model Token {
+  id                String              @id @default(uuid())
+  
+  // Token identification
+  symbol            String
+  name              String
+  decimals          Int
+  
+  // Contract addresses per chain
+  addresses         TokenAddress[]
+  
+  // Token metadata
+  logoUrl           String?
+  coingeckoId       String?
+  coinmarketcapId   String?
+  
+  // Token type
+  isStablecoin      Boolean             @default(false)
+  isWrapped         Boolean             @default(false)
+  isNative          Boolean             @default(false)
+  
+  // Circle USDC specific
+  isCircleUSDC      Boolean             @default(false)
+  cctpEnabled       Boolean             @default(false)
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  // Relations
+  markets           Market[]
+  prices            TokenPrice[]
+  balances          TokenBalance[]
+  approvals         TokenApproval[]
+  
+  @@unique([symbol])
+  @@map("tokens")
+}
+
+model TokenAddress {
+  id                String              @id @default(uuid())
+  tokenId           String
+  token             Token               @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+  
+  chainId           Int
+  address           String
+  
+  isVerified        Boolean             @default(false)
+  verifiedAt        DateTime?
+  
+  @@unique([tokenId, chainId])
+  @@unique([chainId, address])
+  @@index([address])
+  @@map("token_addresses")
+}
+
+model TokenPrice {
+  id                String              @id @default(uuid())
+  tokenId           String
+  token             Token               @relation(fields: [tokenId], references: [id], onDelete: Cascade)
+  
+  // Price data
+  priceUSD          Decimal             @db.Decimal(36, 18)
+  source            PriceSource
+  
+  // TWAP data
+  twapPriceUSD      Decimal?            @db.Decimal(36, 18)
+  twapWindow        Int?                // seconds
+  
+  // Additional data
+  volume24h         Decimal?            @db.Decimal(36, 18)
+  marketCap         Decimal?            @db.Decimal(36, 18)
+  priceChange24h    Decimal?            @db.Decimal(10, 4)
+  
+  timestamp         DateTime            @default(now())
+  
+  @@index([tokenId, timestamp])
+  @@map("token_prices")
+}
+
+enum PriceSource {
+  CHAINLINK
+  PYTH
+  UNISWAP_V3
+  DEX_AGGREGATOR
+  COINGECKO
+  MANUAL
+}
+
+model Market {
+  id                String              @id @default(uuid())
+  
+  // Market identification
+  tokenId           String
+  token             Token               @relation(fields: [tokenId], references: [id])
+  chainId           Int
+  
+  // Contract addresses
+  lendingPoolAddress String
+  aTokenAddress     String              // Interest-bearing token
+  stableDebtAddress String?
+  variableDebtAddress String?
+  
+  // Market parameters
+  isActive          Boolean             @default(true)
+  isIsolated        Boolean             @default(false)
+  isFrozen          Boolean             @default(false)
+  isPaused          Boolean             @default(false)
+  
+  // Risk parameters
+  collateralFactor  Decimal             @db.Decimal(5, 4) // LTV (Loan-to-Value)
+  liquidationThreshold Decimal          @db.Decimal(5, 4)
+  liquidationBonus  Decimal             @db.Decimal(5, 4)
+  reserveFactor     Decimal             @db.Decimal(5, 4)
+  
+  // Interest rate model
+  baseRate          Decimal             @db.Decimal(10, 8)
+  slope1            Decimal             @db.Decimal(10, 8)
+  slope2            Decimal             @db.Decimal(10, 8)
+  optimalUtilization Decimal            @db.Decimal(5, 4)
+  
+  // Caps
+  supplyCap         Decimal?            @db.Decimal(36, 18)
+  borrowCap         Decimal?            @db.Decimal(36, 18)
+  
+  // Timestamps
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  // Relations
+  snapshots         MarketSnapshot[]
+  positions         Position[]
+  
+  @@unique([tokenId, chainId])
+  @@index([chainId])
+  @@index([isActive])
+  @@map("markets")
+}
+
+model MarketSnapshot {
+  id                String              @id @default(uuid())
+  marketId          String
+  market            Market              @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  
+  // Supply metrics
+  totalSupply       Decimal             @db.Decimal(36, 18)
+  totalBorrow       Decimal             @db.Decimal(36, 18)
+  availableLiquidity Decimal            @db.Decimal(36, 18)
+  
+  // Rates
+  supplyAPY         Decimal             @db.Decimal(10, 8)
+  borrowAPY         Decimal             @db.Decimal(10, 8)
+  utilizationRate   Decimal             @db.Decimal(5, 4)
+  
+  // TVL
+  tvlUSD            Decimal             @db.Decimal(36, 2)
+  
+  timestamp         DateTime            @default(now())
+  
+  @@index([marketId, timestamp])
+  @@map("market_snapshots")
+}
+
+// ============================================
+// POSITIONS & LENDING
+// ============================================
+
+model Position {
+  id                String              @id @default(uuid())
+  userId            String
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  walletId          String
+  wallet            Wallet              @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  
+  marketId          String
+  market            Market              @relation(fields: [marketId], references: [id])
+  
+  // Position type
+  positionType      PositionType
+  
+  // Supply position
+  suppliedAmount    Decimal             @default(0) @db.Decimal(36, 18)
+  aTokenBalance     Decimal             @default(0) @db.Decimal(36, 18)
+  
+  // Borrow position
+  borrowedAmount    Decimal             @default(0) @db.Decimal(36, 18)
+  debtTokenBalance  Decimal             @default(0) @db.Decimal(36, 18)
+  borrowType        BorrowType?
+  
+  // Interest tracking
+  accruedInterest   Decimal             @default(0) @db.Decimal(36, 18)
+  lastInterestUpdate DateTime           @default(now())
+  
+  // Health metrics
+  healthFactor      Decimal?            @db.Decimal(10, 4)
+  collateralValue   Decimal             @default(0) @db.Decimal(36, 2)
+  borrowValue       Decimal             @default(0) @db.Decimal(36, 2)
+  
+  // Position status
+  isActive          Boolean             @default(true)
+  isLiquidated      Boolean             @default(false)
+  
+  // Cross-chain data
+  sourceChainId     Int?                // Original chain for cross-chain positions
+  isCrossChain      Boolean             @default(false)
+  
+  // Timestamps
+  openedAt          DateTime            @default(now())
+  closedAt          DateTime?
+  updatedAt         DateTime            @updatedAt
+  
+  // Relations
+  liquidations      Liquidation[]
+  
+  @@unique([userId, marketId, positionType])
+  @@index([userId])
+  @@index([walletId])
+  @@index([marketId])
+  @@index([healthFactor])
+  @@map("positions")
+}
+
+enum PositionType {
+  SUPPLY
+  BORROW
+  COLLATERAL
+}
+
+enum BorrowType {
+  VARIABLE
+  STABLE
+}
+
+model Liquidation {
+  id                String              @id @default(uuid())
+  
+  positionId        String
+  position          Position            @relation(fields: [positionId], references: [id])
+  
+  // Liquidation details
+  liquidator        String              // Address
+  debtToCover       Decimal             @db.Decimal(36, 18)
+  collateralSeized  Decimal             @db.Decimal(36, 18)
+  liquidationBonus  Decimal             @db.Decimal(36, 18)
+  
+  // Transaction
+  txHash            String              @unique
+  blockNumber       BigInt
+  chainId           Int
+  
+  timestamp         DateTime            @default(now())
+  
+  @@index([positionId])
+  @@index([liquidator])
+  @@map("liquidations")
+}
+
+// ============================================
+// TRANSACTIONS & OPERATIONS
+// ============================================
+
+model Transaction {
+  id                String              @id @default(uuid())
+  userId            String
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  walletId          String
+  wallet            Wallet              @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  
+  // Transaction identification
+  txHash            String
+  chainId           Int
+  blockNumber       BigInt?
+  blockTimestamp    DateTime?
+  
+  // Transaction details
+  type              TransactionType
+  status            TransactionStatus   @default(PENDING)
+  
+  // Contract interaction
+  contractAddress   String
+  methodName        String
+  abiSignature      String?
+  
+  // Circle-specific
+  circleTransactionId String?           @unique
+  
+  // Amounts
+  amount            Decimal?            @db.Decimal(36, 18)
+  tokenAddress      String?
+  
+  // Gas
+  gasUsed           BigInt?
+  gasPrice          Decimal?            @db.Decimal(36, 18)
+  gasFeeUSD         Decimal?            @db.Decimal(10, 2)
+  
+  // Cross-chain specific
+  isCrossChain      Boolean             @default(false)
+  sourceChainId     Int?
+  destinationChainId Int?
+  bridgeProvider    String?
+  
+  // Error handling
+  errorMessage      String?
+  errorCode         String?
+  retryCount        Int                 @default(0)
+  
+  // Metadata
+  metadata          Json?
+  
+  // Timestamps
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  confirmedAt       DateTime?
+  
+  // Relations
+  cctpTransfer      CCTPTransfer?
+  
+  @@index([userId])
+  @@index([walletId])
+  @@index([txHash, chainId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+enum TransactionType {
+  SUPPLY
+  WITHDRAW
+  BORROW
+  REPAY
+  LIQUIDATE
+  APPROVE
+  TRANSFER
+  CCTP_BURN
+  CCTP_MINT
+  CROSS_CHAIN_SUPPLY
+  CROSS_CHAIN_BORROW
+  FLASH_LOAN
+  STAKE
+  UNSTAKE
+  CLAIM_REWARDS
+  SWAP
+}
+
+enum TransactionStatus {
+  PENDING
+  CONFIRMING
+  CONFIRMED
+  SUCCESS
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+// ============================================
+// CCTP (Circle Cross-Chain Transfer Protocol)
+// ============================================
+
+model CCTPTransfer {
+  id                String              @id @default(uuid())
+  
+  transactionId     String              @unique
+  transaction       Transaction         @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  
+  // CCTP specific
+  cctpVersion       String              @default("v2") // v1 or v2
+  transferType      CCTPTransferType    @default(STANDARD)
+  
+  // Source chain
+  sourceChainId     Int
+  sourceChainDomain Int                 // CCTP domain
+  sourceTxHash      String
+  burnTxHash        String?
+  
+  // Destination chain
+  destinationChainId Int
+  destinationChainDomain Int            // CCTP domain
+  destinationTxHash String?
+  mintTxHash        String?
+  
+  // Transfer details
+  amount            Decimal             @db.Decimal(36, 18)
+  sender            String
+  recipient         String
+  
+  // CCTP message
+  messageHash       String              @unique
+  messageBytes      String?
+  nonce             BigInt
+  
+  // Attestation
+  attestationHash   String?
+  attestationSignature String?
+  attestationStatus AttestationStatus   @default(PENDING)
+  attestedAt        DateTime?
+  
+  // Fast Transfer specific (CCTP V2)
+  isFastTransfer    Boolean             @default(false)
+  fastTransferAllowance Decimal?        @db.Decimal(36, 18)
+  
+  // Hooks (CCTP V2)
+  hasHooks          Boolean             @default(false)
+  hookContract      String?
+  hookCalldata      String?
+  hookExecuted      Boolean             @default(false)
+  
+  // Status tracking
+  status            CCTPStatus          @default(INITIATED)
+  estimatedTime     Int?                // seconds
+  
+  // Fees
+  protocolFee       Decimal?            @db.Decimal(36, 18)
+  gasFeeSource      Decimal?            @db.Decimal(36, 18)
+  gasFeeDestination Decimal?            @db.Decimal(36, 18)
+  
+  // Error handling
+  errorMessage      String?
+  retryAttempts     Int                 @default(0)
+  
+  // Timestamps
+  initiatedAt       DateTime            @default(now())
+  burnedAt          DateTime?
+  mintedAt          DateTime?
+  completedAt       DateTime?
+  
+  @@index([messageHash])
+  @@index([status])
+  @@index([sourceChainId])
+  @@index([destinationChainId])
+  @@index([initiatedAt])
+  @@map("cctp_transfers")
+}
+
+enum CCTPTransferType {
+  STANDARD  // Standard finality transfer
+  FAST      // Fast transfer (faster-than-finality)
+}
+
+enum CCTPStatus {
+  INITIATED
+  BURN_PENDING
+  BURNED
+  ATTESTATION_PENDING
+  ATTESTED
+  MINT_PENDING
+  MINTED
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum AttestationStatus {
+  PENDING
+  RECEIVED
+  VERIFIED
+  FAILED
+}
+
+// ============================================
+// SMART CONTRACTS (Circle Contracts Integration)
+// ============================================
+
+model SmartContract {
+  id                String              @id @default(uuid())
+  
+  // Contract identification
+  address           String
+  chainId           Int
+  name              String
+  
+  // Contract type
+  contractType      ContractType
+  template          String?             // Template name if deployed via Circle templates
+  
+  // Circle Contract specific
+  circleContractId  String?             @unique
+  deployedViaCircle Boolean             @default(false)
+  
+  // Contract details
+  abi               Json
+  bytecode          String?
+  sourceCode        String?
+  compilerVersion   String?
+  
+  // Verification
+  isVerified        Boolean             @default(false)
+  verifiedAt        DateTime?
+  verificationSource String?
+  
+  // Audit
+  isAudited         Boolean             @default(false)
+  auditedBy         String?
+  auditReport       String?
+  
+  // Status
+  isActive          Boolean             @default(true)
+  isPaused          Boolean             @default(false)
+  isUpgradeable     Boolean             @default(false)
+  implementation    String?             // For proxy contracts
+  
+  // Ownership
+  owner             String
+  admin             String?
+  
+  // Timestamps
+  deployedAt        DateTime            @default(now())
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  // Relations
+  events            ContractEvent[]
+  
+  @@unique([address, chainId])
+  @@index([chainId])
+  @@index([contractType])
+  @@map("smart_contracts")
+}
+
+enum ContractType {
+  LENDING_POOL
+  ATOKEN
+  DEBT_TOKEN
+  INTEREST_RATE_STRATEGY
+  PRICE_ORACLE
+  LIQUIDATION_ENGINE
+  CCTP_TOKEN_MESSENGER
+  CCTP_MESSAGE_TRANSMITTER
+  CROSS_CHAIN_BRIDGE
+  GOVERNANCE
+  TREASURY
+  STAKING
+  REWARDS_DISTRIBUTOR
+  NFT
+  CUSTOM
+}
+
+model ContractEvent {
+  id                String              @id @default(uuid())
+  
+  contractId        String
+  contract          SmartContract       @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  
+  // Event details
+  eventName         String
+  eventSignature    String
+  
+  // Transaction details
+  txHash            String
+  blockNumber       BigInt
+  logIndex          Int
+  
+  // Event data
+  topics            Json
+  data              Json
+  decodedData       Json?
+  
+  timestamp         DateTime            @default(now())
+  
+  // Monitoring
+  isProcessed       Boolean             @default(false)
+  processedAt       DateTime?
+  
+  @@unique([txHash, logIndex])
+  @@index([contractId])
+  @@index([eventName])
+  @@index([blockNumber])
+  @@map("contract_events")
+}
+
+// ============================================
+// NOTIFICATIONS & ALERTS
+// ============================================
+
+model Notification {
+  id                String              @id @default(uuid())
+  userId            String
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type              NotificationType
+  title             String
+  message           String
+  
+  // Priority
+  priority          NotificationPriority @default(MEDIUM)
+  
+  // Status
+  isRead            Boolean             @default(false)
+  readAt            DateTime?
+  
+  // Action
+  actionUrl         String?
+  actionLabel       String?
+  
+  // Metadata
+  metadata          Json?
+  
+  createdAt         DateTime            @default(now())
+  
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+enum NotificationType {
+  TRANSACTION_SUCCESS
+  TRANSACTION_FAILED
+  HEALTH_FACTOR_WARNING
+  LIQUIDATION_WARNING
+  LIQUIDATION_EXECUTED
+  CCTP_TRANSFER_COMPLETE
+  CCTP_TRANSFER_FAILED
+  POSITION_OPENED
+  POSITION_CLOSED
+  REWARD_CLAIMED
+  INTEREST_ACCRUED
+  MARKET_UPDATE
+  SYSTEM_ANNOUNCEMENT
+}
+
+enum NotificationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model HealthFactorAlert {
+  id                String              @id @default(uuid())
+  userId            String
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Alert settings
+  threshold         Decimal             @db.Decimal(10, 4)
+  isActive          Boolean             @default(true)
+  
+  // Notification preferences
+  emailAlert        Boolean             @default(true)
+  pushAlert         Boolean             @default(true)
+  telegramAlert     Boolean             @default(false)
+  telegramChatId    String?
+  
+  // Status
+  lastTriggered     DateTime?
+  triggerCount      Int                 @default(0)
+  
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  
+  @@index([userId, isActive])
+  @@map("health_factor_alerts")
+}
+
+// ============================================
+// TOKENOMICS & REWARDS
+// ============================================
+
+model Stake {
+  id                String              @id @default(uuid())
+  userId            String
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Stake details
+  amount            Decimal             @db.Decimal(36, 18)
+  shares            Decimal             @db.Decimal(36, 18)
+  
+  // Rewards
+  rewardDebt        Decimal             @default(0) @db.Decimal(36, 18)
+  claimedRewards    Decimal             @default(0) @db.Decimal(36, 18)
+  pendingRewards    Decimal             @default(0) @db.Decimal(36, 18)
+  
+  // Lock period
+  lockDuration      Int?                // seconds
+  lockedUntil       DateTime?
+  
+  // Status
+  isActive          Boolean             @default(true)
+  
+  // Timestamps
+  stakedAt          DateTime            @default(now())
+  unstakedAt        DateTime?
+  
+  @@index([userId])
+  @@index([isActive])
+  @@map("stakes")
+}
+
+model RewardDistribution {
+  id                String              @id @default(uuid())
+  
+  // Distribution details
+  epoch             Int
+  totalRewards      Decimal             @db.Decimal(36, 18)
+  
+  // Distribution splits
+  supplierRewards   Decimal             @db.Decimal(36, 18)
+  borrowerRewards   Decimal             @db.Decimal(36, 18)
+  liquidatorRewards Decimal             @db.Decimal(36, 18)
+  stakerRewards     Decimal             @db.Decimal(36, 18)
+  
+  // Distribution by market
+  marketAllocations Json
+  
+  // Status
+  isDistributed     Boolean             @default(false)
+  distributedAt     DateTime?
+  
+  // Period
+  startDate         DateTime
+  endDate           DateTime
+  createdAt         DateTime            @default(now())
+  
+  @@unique([epoch])
+  @@index([startDate, endDate])
+  @@map("reward_distributions")
+}
+
+// ============================================
+// GOVERNANCE
+// ============================================
+
+model Proposal {
+  id                String              @id @default(uuid())
+  
+  // Proposal details
+  proposalId        BigInt              @unique
+  title             String
+  description       String
+  
+  // Proposer
+  proposer          String              // Address
+  
+  // Voting
+  forVotes          Decimal             @db.Decimal(36, 18)
+  againstVotes      Decimal             @db.Decimal(36, 18)
+  abstainVotes      Decimal             @db.Decimal(36, 18)
+  
+  // Status
+  status            ProposalStatus      @default(PENDING)
+  
+  // Execution
+  executionTxHash   String?
+  executedAt        DateTime?
+  
+  // Timeline
+  startBlock        BigInt
+  endBlock          BigInt
+  eta               DateTime?
+  
+  createdAt         DateTime            @default(now())
+  
+  // Relations
+  votes             Vote[]
+  
+  @@index([status])
+  @@index([startBlock])
+  @@map("proposals")
+}
+
+enum ProposalStatus {
+  PENDING
+  ACTIVE
+  CANCELLED
+  DEFEATED
+  SUCCEEDED
+  QUEUED
+  EXPIRED
+  EXECUTED
+}
+
+model Vote {
+  id                String              @id @default(uuid())
+  
+  proposalId        String
+  proposal          Proposal            @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  
+  voter             String              // Address
+  support           VoteChoice
+  votingPower       Decimal             @db.Decimal(36, 18)
+  reason            String?
+  
+  txHash            String
+  blockNumber       BigInt
+  
+  createdAt         DateTime            @default(now())
+  
+  @@unique([proposalId, voter])
+  @@index([proposalId])
+  @@map("votes")
+}
+
+enum VoteChoice {
+  FOR
+  AGAINST
+  ABSTAIN
+}
+
+// ============================================
+// REFERRAL SYSTEM
+// ============================================
+
+model Referral {
+  id                String              @id @default(uuid())
+  
+  // Referrer
+  referrerId        String              @unique
+  referrer          User                @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  
+  // Referred user
+  referredId        String              @unique
+  referred          User                @relation("Referred", fields: [referredId], references: [id], onDelete: Cascade)
+  
+  // Referral code
+  code              String              @unique
+  
+  // Rewards
+  referrerRewards   Decimal             @default(0) @db.Decimal(36, 18)
+  referredRewards   Decimal             @default(0) @db.Decimal(36, 18)
+  
+  // Status
+  isActive          Boolean             @default(true)
+  
+  createdAt         DateTime            @default(now())
+  
+  @@index([code])
+  @@index([referrerId])
+  @@map("referrals")
+}
+
+// ============================================
+// ANALYTICS & METRICS
+// ============================================
+
+model ProtocolMetrics {
+  id                String              @id @default(uuid())
+  
+  // TVL
+  totalValueLocked  Decimal             @db.Decimal(36, 2)
+  totalSupplied     Decimal             @db.Decimal(36, 2)
+  totalBorrowed     Decimal             @db.Decimal(36, 2)
+  
+  // Volume
+  volume24h         Decimal             @db.Decimal(36, 2)
+  volume7d          Decimal             @db.Decimal(36, 2)
+  volume30d         Decimal             @db.Decimal(36, 2)
+  
+  // Users
+  totalUsers        Int
+  activeUsers24h    Int
+  activeUsers7d     Int
+  activeUsers30d    Int
+  
+  // Transactions
+  totalTransactions BigInt
+  transactions24h   Int
+  
+  // Cross-chain
+  cctpTransfers24h  Int
+  cctpVolume24h     Decimal             @db.Decimal(36, 2)
+  
+  // Revenue
+  protocolRevenue24h Decimal            @db.Decimal(36, 2)
+  protocolRevenue7d  Decimal            @db.Decimal(36, 2)
+  protocolRevenue30d Decimal            @db.Decimal(36, 2)
+  
+  timestamp         DateTime            @default(now())
+  
+  @@index([timestamp])
+  @@map("protocol_metrics")
+}
+
+model ChainMetrics {
+  id                String              @id @default(uuid())
+  chainId           Int
+  
+  // TVL
+  tvl               Decimal             @db.Decimal(36, 2)
+  
+  // Volume
+  volume24h         Decimal             @db.Decimal(36, 2)
+  
+  timestamp         DateTime            @default(now())
+  
+  @@index([chainId, timestamp])
+  @@map("chain_metrics")
+}
