@@ -60,18 +60,23 @@ export function BridgeWidget() {
             });
 
             // 2. Bridge
-            await writeContractAsync({
+            const txHash = await writeContractAsync({
                 address: BRIDGE_ADDRESS,
                 abi: CROSS_CHAIN_BRIDGE_ABI,
                 functionName: 'sendCrossChainDeposit',
                 args: [BigInt(10), tokenAddress as `0x${string}`, amountObj, recipient as `0x${string}`],
             });
 
-            alert(`Successfully bridged ${payAmount} ${selectedToken} to ${recipient}!`);
+            const userConfirmed = confirm(`Transaction Sent! \nTx Hash: ${txHash}\n\nClick OK to view on ArcScan, or Cancel to stay.`);
+
+            if (userConfirmed) {
+                window.open(`https://testnet.arcscan.app/tx/${txHash}`, '_blank');
+            }
+
             setPayAmount("");
         } catch (error) {
             console.error("Bridge failed:", error);
-            alert("Transaction failed. Check console.");
+            alert("Transaction failed or rejected. Check console for details.");
         } finally {
             setIsTransferring(false);
         }
