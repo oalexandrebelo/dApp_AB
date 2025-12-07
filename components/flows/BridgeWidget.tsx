@@ -1,9 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-"use client";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -92,7 +88,7 @@ export function BridgeWidget() {
                     <button className="px-5 py-2 text-sm font-medium bg-[#1d212b] text-white rounded-md shadow-sm">P2P</button>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" className="h-9 w-9 text-zinc-400 hover:text-white hover:bg-white/5 rounded-lg border border-white/5"><Settings className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-9 w-9 text-zinc-400 hover:text-white hover:bg-white/5"><Settings className="h-4 w-4" /></Button>
                 </div>
             </div>
 
