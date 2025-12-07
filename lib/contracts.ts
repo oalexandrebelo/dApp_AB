@@ -35,31 +35,15 @@ export const ERC20_ABI = [
         type: "function",
     },
 ] as const;
-
-export const LENDING_POOL_ABI = [
-    {
-        inputs: [
-            { name: "asset", type: "address" },
-            { name: "amount", type: "uint256" },
-            { name: "onBehalfOf", type: "address" },
-            { name: "referralCode", type: "uint16" },
+{ name: "asset", type: "address" },
+{ name: "amount", type: "uint256" },
+{ name: "interestRateMode", type: "uint256" },
+{ name: "referralCode", type: "uint16" },
+{ name: "onBehalfOf", type: "address" },
         ],
-        name: "supply",
-        outputs: [],
+name: "borrow",
+    outputs: [],
         stateMutability: "nonpayable",
-        type: "function",
+            type: "function",
     },
-    {
-        inputs: [
-            { name: "asset", type: "address" },
-            { name: "amount", type: "uint256" },
-            { name: "interestRateMode", type: "uint256" },
-            { name: "referralCode", type: "uint16" },
-            { name: "onBehalfOf", type: "address" },
-        ],
-        name: "borrow",
-        outputs: [],
-        stateMutability: "nonpayable",
-        type: "function",
-    },
-] as const;
+] as const ;
