@@ -7,14 +7,14 @@ import { BorrowModal } from "@/components/flows/BorrowModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useAccount, useReadContract } from "wagmi";
-import { ARC_TESTNET_CHAIN_ID, USDC_ADDRESS, ETH_ADDRESS, WBTC_ADDRESS, ERC20_ABI } from "@/lib/contracts";
+import { ARC_TESTNET_CHAIN_ID, USDC_ADDRESS, EURC_ADDRESS, USYC_ADDRESS, ERC20_ABI } from "@/lib/contracts";
 
 import { useLanguage } from '@/lib/i18n';
 
 const ASSET_CONFIGS = [
     { id: "usdc", symbol: "USDC", name: "USD Coin", address: USDC_ADDRESS, decimals: 6, apy: "4.5%", variableApy: "5.5%", liquidity: "5M" },
-    { id: "eth", symbol: "ETH", name: "Ethereum", address: ETH_ADDRESS, decimals: 18, apy: "3.2%", variableApy: "4.1%", liquidity: "12M" },
-    { id: "wbtc", symbol: "WBTC", name: "Wrapped Btc", address: WBTC_ADDRESS, decimals: 8, apy: "1.8%", variableApy: "2.5%", liquidity: "8M" },
+    { id: "eurc", symbol: "EURC", name: "Euro Coin", address: EURC_ADDRESS, decimals: 6, apy: "3.2%", variableApy: "4.2%", liquidity: "2M" },
+    { id: "usyc", symbol: "USYC", name: "Yield Coin", address: USYC_ADDRESS, decimals: 6, apy: "5.1%", variableApy: "6.0%", liquidity: "1M" },
 ] as const;
 
 export function AssetTable() {

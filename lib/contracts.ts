@@ -5,7 +5,8 @@ export const BRIDGE_ADDRESS = "0xDb4186A4B68351713F57a9AA729f88c6Aa49400e"; // D
 
 export const USDC_ADDRESS = "0x3600000000000000000000000000000000000000"; // Arc Testnet Native USDC
 export const EURC_ADDRESS = "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a"; // Arc Testnet EURC
-export const ETH_ADDRESS = "0x0000000000000000000000000000000000000000"; // Placeholder (WETH?)
+export const USYC_ADDRESS = "0xe9185F0c5F296Ed1797AaE4238D26CCaBEadb86C"; // Arc Testnet USYC
+// ETH and WBTC are not supported on Arc Testnet
 
 export const ERC20_ABI = [
     {
@@ -37,7 +38,6 @@ export const ERC20_ABI = [
     },
 ] as const;
 
-export const WBTC_ADDRESS = "0x0000000000000000000000000000000000000000"; // Placeholder
 export const LENDING_POOL_ADDRESS = "0x0000000000000000000000000000000000000000"; // Placeholder
 
 export const LENDING_POOL_ABI = [
