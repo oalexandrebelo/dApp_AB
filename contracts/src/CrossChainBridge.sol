@@ -47,7 +47,7 @@ contract CrossChainBridge {
         // 1. Mint/Unlock assets
         // For simulation, we just unlock if we have them, or mint if we were a mintable token.
         // Here we assume we just send back locked funds or mint.
-        // IERC20(asset).transfer(user, amount); // Uncomment if real locking
+        IERC20(asset).transfer(user, amount);
         
         // 2. Call LendingPool.supply() on behalf of user (Optional integration)
         
