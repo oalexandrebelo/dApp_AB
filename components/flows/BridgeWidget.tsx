@@ -3,253 +3,165 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowDownUp, Settings, ChevronDown, Wallet, RefreshCw, Info } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAccount, useWriteContract, useSwitchChain } from "wagmi";
-import { BRIDGE_ADDRESS, CROSS_CHAIN_BRIDGE_ABI, ERC20_ABI, ARC_TESTNET_CHAIN_ID, USDC_ADDRESS } from "@/lib/contracts";
+import { ChevronDown, RefreshCw, CheckCircle2 } from "lucide-react";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { ERC20_ABI, USDC_ADDRESS, EURC_ADDRESS } from "@/lib/contracts";
 
 export function BridgeWidget() {
     const { address, isConnected } = useAccount();
-    const { switchChain } = useSwitchChain();
     const { writeContractAsync } = useWriteContract();
 
-    const [payAmount, setPayAmount] = useState("");
+    // State
+    const [selectedToken, setSelectedToken] = useState<"USDC" | "EURC">("USDC");
+    const [recipient, setRecipient] = useState("");
+    const [amount, setAmount] = useState("");
     const [isTransferring, setIsTransferring] = useState(false);
-    const [lastTxHash, setLastTxHash] = useState("");
+    const [lastTxHash, setLastTxHash] = useState<`0x${string}` | undefined>(undefined);
 
-    // Debridge features
-    const [isTradeAndSend, setIsTradeAndSend] = useState(false); // Checkbox state
-    const [useCustomRecipient, setUseCustomRecipient] = useState(false); // Expanded/Collapsed state
-    const [customRecipient, setCustomRecipient] = useState("");
+    // Transaction Monitoring
+    const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+        hash: lastTxHash,
+    });
 
-    // Chains state (Static for now as per requirements)
-    const [destChain, setDestChain] = useState("optimism");
-
-    // Token Locked to USDC
-    const selectedToken = "USDC";
-
-    // Helper: Address Mapper
     const getTokenAddress = () => {
-        return USDC_ADDRESS;
+        return selectedToken === "USDC" ? USDC_ADDRESS : EURC_ADDRESS;
     };
 
-    const handleTransfer = async () => {
+    const handleSend = async () => {
         if (!isConnected) return;
+        if (!recipient || !amount) {
+            alert("Please fill in all fields");
+            return;
+        }
+
         setIsTransferring(true);
-        setLastTxHash(""); // Reset previous hash
+        setLastTxHash(undefined);
 
         try {
-            // 0. Ensure we are on the right chain (Stub logic for Arc Testnet)
-            // switchChain({ chainId: ARC_TESTNET_CHAIN_ID }); 
-
             const tokenAddress = getTokenAddress();
-            const amountObj = BigInt(Number(payAmount) * 1000000); // 6 decimals for USDC
+            const amountObj = BigInt(Number(amount) * 1000000); // Assuming 6 decimals for both
 
-            // Determine recipient
-            const recipient = (useCustomRecipient && customRecipient) ? customRecipient : address;
-
-            if (!recipient) throw new Error("Invalid Recipient");
-
-            // 1. Approve
-            await writeContractAsync({
+            // Execute ERC20 Transfer
+            const txHash = await writeContractAsync({
                 address: tokenAddress as `0x${string}`,
                 abi: ERC20_ABI,
-                functionName: 'approve',
-                args: [BRIDGE_ADDRESS, amountObj],
-            });
-
-            // 2. Bridge
-            const txHash = await writeContractAsync({
-                address: BRIDGE_ADDRESS,
-                abi: CROSS_CHAIN_BRIDGE_ABI,
-                functionName: 'sendCrossChainDeposit',
-                args: [BigInt(10), tokenAddress as `0x${string}`, amountObj, recipient as `0x${string}`],
+                functionName: 'transfer',
+                args: [recipient as `0x${string}`, amountObj],
             });
 
             setLastTxHash(txHash);
-            setPayAmount("");
+            // Don't clear form immediately so user can see what they sent, or optional.
+            // setAmount(""); 
         } catch (error) {
-            console.error("Bridge failed:", error);
-            alert("Transaction failed or rejected. Check console for details.");
+            console.error("Transfer failed:", error);
+            alert("Transaction failed. Check console.");
         } finally {
             setIsTransferring(false);
         }
     };
 
     return (
-        <div className="w-full max-w-[480px] mx-auto font-sans">
-            {/* Header / Tabs */}
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex bg-[#0f121a] p-1 rounded-lg border border-white/5">
-                    {/* Visual only tabs as requested - "Limit" and "Market" disabled style */}
-                    <button className="px-5 py-2 text-sm font-medium text-zinc-500 cursor-not-allowed">Market</button>
-                    <button className="px-5 py-2 text-sm font-medium text-zinc-500 cursor-not-allowed">Limit</button>
-                    <button className="px-5 py-2 text-sm font-medium bg-[#1d212b] text-white rounded-md shadow-sm">P2P</button>
-                </div>
-                <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" className="h-9 w-9 text-zinc-400 hover:text-white hover:bg-white/5"><Settings className="h-4 w-4" /></Button>
+        <div className="w-full max-w-[480px] mx-auto font-sans bg-white text-black p-6 rounded-3xl shadow-xl border border-zinc-100">
+
+            {/* Token Selection */}
+            <div className="grid grid-cols-2 gap-4 mb-6">
+                <button
+                    onClick={() => setSelectedToken("USDC")}
+                    className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${selectedToken === "USDC"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-zinc-200 hover:border-zinc-300"
+                        }`}
+                >
+                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs mb-2">
+                        $
+                    </div>
+                    <span className="font-semibold text-sm">USDC</span>
+                </button>
+
+                <button
+                    onClick={() => setSelectedToken("EURC")}
+                    className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${selectedToken === "EURC"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-zinc-200 hover:border-zinc-300"
+                        }`}
+                >
+                    <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs mb-2">
+                        €
+                    </div>
+                    <span className="font-semibold text-sm">EURC</span>
+                </button>
+            </div>
+
+            {/* Network */}
+            <div className="mb-4">
+                <label className="block text-sm font-semibold text-zinc-700 mb-2">Network</label>
+                <div className="flex items-center justify-between bg-white border border-zinc-300 rounded-lg p-3 px-4 shadow-sm">
+                    <div className="flex items-center gap-2">
+                        <div className="w-5 h-5 rounded-full bg-black text-white flex items-center justify-center text-[10px]">A</div>
+                        <span className="text-sm font-medium">Arc Testnet</span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 text-zinc-400" />
                 </div>
             </div>
 
-            {/* Widget Box */}
-            <div className="space-y-2">
+            {/* Send to */}
+            <div className="mb-4">
+                <label className="block text-sm font-semibold text-zinc-700 mb-2">Send to</label>
+                <Input
+                    placeholder="Wallet address"
+                    className="h-12 border-zinc-300 text-black placeholder:text-zinc-400 bg-white"
+                    value={recipient}
+                    onChange={(e) => setRecipient(e.target.value)}
+                />
+            </div>
 
-                {/* 1. YOU PAY */}
-                <div className="bg-[#0b101b] rounded-t-xl rounded-b-lg p-5 border border-white/5 relative">
-                    <div className="flex justify-between text-sm text-zinc-400 mb-3">
-                        <span className="font-medium text-white">You pay</span>
-                        <span className="text-zinc-500">Balance: {isConnected ? "1,000.00" : "0"} USDC</span>
-                    </div>
+            {/* Value */}
+            <div className="mb-6">
+                <label className="block text-sm font-semibold text-zinc-700 mb-2">Value</label>
+                <Input
+                    type="number"
+                    placeholder="0,00"
+                    className="h-12 border-zinc-300 text-black placeholder:text-zinc-400 bg-white"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                />
+            </div>
 
-                    <div className="flex items-center gap-4 bg-[#131823] p-3 rounded-lg border border-white/5">
-                        <div className="flex items-center gap-2 bg-[#1d212b] px-3 py-1.5 rounded-full border border-white/5 min-w-[110px]">
-                            <div className="h-5 w-5 rounded-full bg-blue-500 flex items-center justify-center text-[8px] text-white shrink-0">$</div>
-                            <span className="font-semibold text-white">USDC</span>
-                            <ChevronDown className="h-3 w-3 text-zinc-500 ml-auto" />
-                        </div>
-
-                        <Input
-                            type="number"
-                            placeholder="0"
-                            className="flex-1 text-right text-2xl font-medium bg-transparent border-none focus-visible:ring-0 p-0 text-white placeholder:text-zinc-600 h-auto"
-                            value={payAmount}
-                            onChange={(e) => setPayAmount(e.target.value)}
-                        />
-                    </div>
-                </div>
-
-                {/* Swap Icon Divider */}
-                <div className="relative h-2 z-10">
-                    <div className="absolute left-1/2 -translate-x-1/2 -top-5">
-                        <div className="bg-[#0b101b] p-1 rounded-lg border border-white/10">
-                            <Button
-                                size="icon"
-                                className="h-8 w-8 rounded-md bg-[#1d212b] text-zinc-400 hover:text-white transition-all"
-                            >
-                                <ArrowDownUp className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-
-                {/* 2. YOU RECEIVE */}
-                <div className="bg-[#0b101b] rounded-t-lg rounded-b-xl p-5 border border-white/5 pt-6">
-                    <div className="flex justify-between text-sm text-zinc-400 mb-2">
-                        <span className="font-medium text-white">You receive</span>
-                        <span className="text-zinc-500">Balance: {isConnected ? "0.00" : "0"} USDC</span>
-                    </div>
-
-                    <div className="mb-3 text-xs text-zinc-500 flex items-center gap-2">
-                        <span>Buy at the rate</span>
-                        <ArrowDownUp className="h-3 w-3 text-[#D1F840] rotate-90" />
-                    </div>
-
-                    <div className="flex items-center gap-2 text-zinc-600 text-sm mb-3">
-                        <div className="bg-[#131823] px-3 py-2 rounded-md w-full border border-white/5">0</div>
-                    </div>
-
-                    <div className="flex items-center gap-4 bg-[#131823] p-3 rounded-lg border border-white/5 opacity-90">
-                        <div className="flex items-center gap-2 bg-[#1d212b] px-3 py-1.5 rounded-full border border-white/5 min-w-[110px]">
-                            <div className="h-5 w-5 rounded-full bg-blue-500 flex items-center justify-center text-[8px] text-white shrink-0">$</div>
-                            <span className="font-semibold text-white">USDC</span>
-                            <ChevronDown className="h-3 w-3 text-zinc-500 ml-auto" />
-                        </div>
-                        <Input
-                            type="number"
-                            placeholder="0"
-                            className="flex-1 text-right text-2xl font-medium bg-transparent border-none focus-visible:ring-0 p-0 text-zinc-600 h-auto"
-                            value={payAmount}
-                            readOnly
-                        />
-                    </div>
-                </div>
-
-                {/* 3. Trade and Send / Routing Options */}
-                <div className="bg-[#0b101b] p-4 rounded-xl border border-white/5 space-y-4">
-                    {/* "Trade and Send" Checkbox row */}
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 cursor-pointer" onClick={() => setIsTradeAndSend(!isTradeAndSend)}>
-                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${isTradeAndSend ? 'bg-[#D1F840] border-[#D1F840]' : 'border-zinc-600 bg-transparent'}`}>
-                                {isTradeAndSend && <div className="w-2 h-2 bg-black rounded-sm" />}
-                            </div>
-                            <span className="text-sm text-zinc-300">Trade and Send to Another Address</span>
-                        </div>
-                        <div className="flex items-center gap-1 text-xs text-zinc-500">
-                            Routing <ChevronDown className="h-3 w-3" />
-                        </div>
-                    </div>
-                </div>
-
-                {/* 4. Counterparty Address Section */}
-                <div className="bg-[#0b101b] p-4 rounded-xl border border-white/5">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                            {/* Toggle Switch */}
-                            <div
-                                className={`w-10 h-6 rounded-full relative transition-colors cursor-pointer ${useCustomRecipient ? 'bg-zinc-200' : 'bg-zinc-700'}`}
-                                onClick={() => setUseCustomRecipient(!useCustomRecipient)}
-                            >
-                                <div className={`absolute top-1 w-4 h-4 rounded-full bg-black transition-all shadow-sm ${useCustomRecipient ? 'left-5' : 'left-1'}`} />
-                            </div>
-                            <span className="text-sm font-medium text-white flex items-center gap-2">
-                                Counterparty address <Info className="h-3 w-3 text-zinc-600" />
-                            </span>
-                        </div>
-                        <span className="text-xs text-zinc-500 flex items-center gap-1 cursor-pointer hover:text-zinc-300">
-                            Counterparties book <ChevronDown className="h-3 w-3" />
+            {/* Status Feedback (Preserved & Adapted for Light Mode) */}
+            {lastTxHash && (
+                <div className={`mb-4 p-4 rounded-lg flex flex-col gap-2 transition-colors border ${isConfirmed ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
+                    <div className="flex items-center gap-2">
+                        {isConfirmed ? (
+                            <CheckCircle2 className="h-4 w-4 text-green-600" />
+                        ) : (
+                            <RefreshCw className="h-4 w-4 text-yellow-600 animate-spin" />
+                        )}
+                        <span className={`font-semibold text-sm ${isConfirmed ? 'text-green-700' : 'text-yellow-700'}`}>
+                            {isConfirmed ? "Transfer Completed!" : "Transfer Initiated..."}
                         </span>
                     </div>
-
-                    {useCustomRecipient ? (
-                        <div className="animate-in slide-in-from-top-2 fade-in duration-200">
-                            <Input
-                                placeholder="Address in Optimism *"
-                                className="bg-[#131823] border-white/10 text-white font-mono text-sm h-12 focus-visible:ring-[#D1F840] placeholder:text-zinc-600"
-                                value={customRecipient}
-                                onChange={(e) => setCustomRecipient(e.target.value)}
-                            />
-                        </div>
-                    ) : (
-                        <div className="text-center py-6 border border-dashed border-white/5 rounded-lg bg-[#131823]/50">
-                            <div className="text-sm text-zinc-500 mb-3">You don't have any addresses added yet</div>
-                            <button
-                                className="text-sm text-white flex items-center justify-center gap-1 mx-auto hover:text-[#D1F840] transition-colors"
-                                onClick={() => setUseCustomRecipient(true)}
-                            >
-                                <span className="text-lg leading-none">+</span> Add address
-                            </button>
-                        </div>
-                    )}
+                    <a
+                        href={`https://testnet.arcscan.app/tx/${lastTxHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`text-xs underline break-all ${isConfirmed ? 'text-green-600 hover:text-green-500' : 'text-yellow-600 hover:text-yellow-500'}`}
+                    >
+                        View on ArcScan
+                    </a>
                 </div>
+            )}
 
-                {/* Success Message Area - Only show if hash exists */}
-                {lastTxHash && (
-                    <div className="bg-green-500/10 border border-green-500/20 p-4 rounded-lg flex flex-col gap-2 mb-2">
-                        <span className="text-green-500 font-semibold text-sm">Transfer Initiated!</span>
-                        <a
-                            href={`https://testnet.arcscan.app/tx/${lastTxHash}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-green-400 underline hover:text-green-300 break-all"
-                        >
-                            View on ArcScan: {lastTxHash}
-                        </a>
-                    </div>
-                )}
-
-                {/* 5. Connect / Action Button */}
-                <Button
-                    className="w-full bg-[#D1F840] hover:bg-[#bce628] text-black font-bold h-12 text-base rounded-lg mt-2 disabled:opacity-50"
-                    onClick={handleTransfer}
-                    disabled={isTransferring}
-                >
-                    {isConnected
-                        ? (isTransferring ? "Processing..." : "Confirm")
-                        : "Connect wallet"
-                    }
-                </Button>
-
-            </div>
+            {/* Send Button */}
+            <Button
+                className="w-full h-12 text-base font-semibold bg-[#5D9CDB] hover:bg-[#4a8ac9] text-white shadow-md rounded-xl"
+                onClick={handleSend}
+                disabled={isTransferring || (!!lastTxHash && !isConfirmed) || !isConnected}
+            >
+                {isConnected
+                    ? (isTransferring ? "Sending..." : "Send")
+                    : "Connect Wallet"
+                }
+            </Button>
         </div>
     );
 }
