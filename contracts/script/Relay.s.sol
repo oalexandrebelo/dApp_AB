@@ -11,7 +11,7 @@ contract RelayScript is Script {
         address deployer = vm.addr(deployerPrivateKey);
 
         // 2. Setup Addresses (Arc Testnet)
-        address bridgeAddress = 0x1234567890123456789012345678901234567890; 
+        address bridgeAddress = 0xDb4186A4B68351713F57a9AA729f88c6Aa49400e; 
         
         // Arc Testnet USDC (Native/System Contract)
         address asset = 0x3600000000000000000000000000000000000000;
