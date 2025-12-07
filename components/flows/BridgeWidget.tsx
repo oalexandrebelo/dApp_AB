@@ -39,7 +39,8 @@ export function BridgeWidget() {
 
         try {
             const tokenAddress = getTokenAddress();
-            const amountObj = BigInt(Number(amount) * 1000000); // Assuming 6 decimals for both
+            const sanitizedAmount = amount.replace(',', '.');
+            const amountObj = BigInt(Math.floor(Number(sanitizedAmount) * 1000000)); // Assuming 6 decimals for both
 
             // Execute ERC20 Transfer
             const txHash = await writeContractAsync({
@@ -68,8 +69,8 @@ export function BridgeWidget() {
                 <button
                     onClick={() => setSelectedToken("USDC")}
                     className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${selectedToken === "USDC"
-                            ? "border-blue-500 bg-blue-50"
-                            : "border-zinc-200 hover:border-zinc-300"
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-zinc-200 hover:border-zinc-300"
                         }`}
                 >
                     <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs mb-2">
@@ -81,8 +82,8 @@ export function BridgeWidget() {
                 <button
                     onClick={() => setSelectedToken("EURC")}
                     className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${selectedToken === "EURC"
-                            ? "border-blue-500 bg-blue-50"
-                            : "border-zinc-200 hover:border-zinc-300"
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-zinc-200 hover:border-zinc-300"
                         }`}
                 >
                     <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs mb-2">
