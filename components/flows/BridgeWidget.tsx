@@ -15,6 +15,7 @@ export function BridgeWidget() {
 
     const [payAmount, setPayAmount] = useState("");
     const [isTransferring, setIsTransferring] = useState(false);
+    const [lastTxHash, setLastTxHash] = useState("");
 
     // Debridge features
     const [isTradeAndSend, setIsTradeAndSend] = useState(false); // Checkbox state
@@ -35,6 +36,7 @@ export function BridgeWidget() {
     const handleTransfer = async () => {
         if (!isConnected) return;
         setIsTransferring(true);
+        setLastTxHash(""); // Reset previous hash
 
         try {
             // 0. Ensure we are on the right chain (Stub logic for Arc Testnet)
@@ -44,9 +46,6 @@ export function BridgeWidget() {
             const amountObj = BigInt(Number(payAmount) * 1000000); // 6 decimals for USDC
 
             // Determine recipient
-            // If "Counterparty address" is open AND filled, use it.
-            // OR if "Trade and Send to Another Address" logic implies it.
-            // For this implementation, we use customRecipient if provided, else user address.
             const recipient = (useCustomRecipient && customRecipient) ? customRecipient : address;
 
             if (!recipient) throw new Error("Invalid Recipient");
@@ -67,12 +66,7 @@ export function BridgeWidget() {
                 args: [BigInt(10), tokenAddress as `0x${string}`, amountObj, recipient as `0x${string}`],
             });
 
-            const userConfirmed = confirm(`Transaction Sent! \nTx Hash: ${txHash}\n\nClick OK to view on ArcScan, or Cancel to stay.`);
-
-            if (userConfirmed) {
-                window.open(`https://testnet.arcscan.app/tx/${txHash}`, '_blank');
-            }
-
+            setLastTxHash(txHash);
             setPayAmount("");
         } catch (error) {
             console.error("Bridge failed:", error);
@@ -227,6 +221,21 @@ export function BridgeWidget() {
                         </div>
                     )}
                 </div>
+
+                {/* Success Message Area - Only show if hash exists */}
+                {lastTxHash && (
+                    <div className="bg-green-500/10 border border-green-500/20 p-4 rounded-lg flex flex-col gap-2 mb-2">
+                        <span className="text-green-500 font-semibold text-sm">Transfer Initiated!</span>
+                        <a
+                            href={`https://testnet.arcscan.app/tx/${lastTxHash}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-green-400 underline hover:text-green-300 break-all"
+                        >
+                            View on ArcScan: {lastTxHash}
+                        </a>
+                    </div>
+                )}
 
                 {/* 5. Connect / Action Button */}
                 <Button
