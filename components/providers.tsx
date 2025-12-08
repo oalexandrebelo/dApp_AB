@@ -11,9 +11,9 @@ import { LanguageProvider, useLanguage } from '@/lib/i18n';
 const arcTestnet = {
     id: 5042002,
     name: 'Arc Testnet',
-    nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+    nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 },
     rpcUrls: {
-        default: { http: ['http://127.0.0.1:8545'] },
+        default: { http: ['https://rpc.testnet.arc.network'] },
     },
     blockExplorers: {
         default: { name: 'ArcScan', url: 'https://testnet.arcscan.app' },
