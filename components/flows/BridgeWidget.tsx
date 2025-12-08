@@ -20,7 +20,7 @@ export function BridgeWidget() {
     const [lastTxHash, setLastTxHash] = useState<`0x${string}` | undefined>(undefined);
 
     // Transaction Monitoring
-    const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+    const { isSuccess: isConfirmed } = useWaitForTransactionReceipt({
         hash: lastTxHash,
     });
 
