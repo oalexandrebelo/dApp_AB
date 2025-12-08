@@ -4,8 +4,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ChevronDown, RefreshCw, CheckCircle2 } from "lucide-react";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 import { ERC20_ABI, USDC_ADDRESS, EURC_ADDRESS } from "@/lib/contracts";
+import { formatUnits, parseUnits } from "viem";
 
 export function BridgeWidget() {
     const { address, isConnected } = useAccount();
@@ -27,6 +28,22 @@ export function BridgeWidget() {
         return selectedToken === "USDC" ? USDC_ADDRESS : EURC_ADDRESS;
     };
 
+    // Balance Fetching
+    const { data: balanceData, refetch: refetchBalance } = useReadContract({
+        address: getTokenAddress() as `0x${string}`,
+        abi: ERC20_ABI,
+        functionName: 'balanceOf',
+        args: [address!],
+        query: {
+            enabled: !!address,
+            refetchInterval: 5000
+        }
+    });
+
+    // Formatting Balance (Standard Circle tokens use 6 decimals)
+    const decimals = 6;
+    const formattedBalance = balanceData ? formatUnits(balanceData, decimals) : "0.00";
+
     const handleSend = async () => {
         if (!isConnected) return;
         if (!recipient || !amount) {
@@ -40,7 +57,9 @@ export function BridgeWidget() {
         try {
             const tokenAddress = getTokenAddress();
             const sanitizedAmount = amount.replace(',', '.');
-            const amountObj = BigInt(Math.floor(Number(sanitizedAmount) * 1000000)); // Assuming 6 decimals for both
+
+            // Use parseUnits for safer conversion than math.floor
+            const amountObj = parseUnits(sanitizedAmount, decimals);
 
             // Execute ERC20 Transfer
             const txHash = await writeContractAsync({
@@ -51,13 +70,18 @@ export function BridgeWidget() {
             });
 
             setLastTxHash(txHash);
-            // Don't clear form immediately so user can see what they sent, or optional.
-            // setAmount(""); 
+            refetchBalance();
         } catch (error) {
             console.error("Transfer failed:", error);
-            alert("Transaction failed. Check console.");
+            // alert("Transaction failed. Check console."); 
         } finally {
             setIsTransferring(false);
+        }
+    };
+
+    const handleMax = () => {
+        if (formattedBalance) {
+            setAmount(formattedBalance);
         }
     };
 
@@ -69,8 +93,8 @@ export function BridgeWidget() {
                 <button
                     onClick={() => setSelectedToken("USDC")}
                     className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${selectedToken === "USDC"
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-zinc-200 hover:border-zinc-300"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-zinc-200 hover:border-zinc-300"
                         }`}
                 >
                     <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs mb-2">
@@ -82,8 +106,8 @@ export function BridgeWidget() {
                 <button
                     onClick={() => setSelectedToken("EURC")}
                     className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${selectedToken === "EURC"
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-zinc-200 hover:border-zinc-300"
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-zinc-200 hover:border-zinc-300"
                         }`}
                 >
                     <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs mb-2">
@@ -118,7 +142,15 @@ export function BridgeWidget() {
 
             {/* Value */}
             <div className="mb-6">
-                <label className="block text-sm font-semibold text-zinc-700 mb-2">Value</label>
+                <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-semibold text-zinc-700">Value</label>
+                    <div className="text-xs text-zinc-500 font-medium flex items-center gap-2">
+                        Balance: {Number(formattedBalance).toLocaleString(undefined, { maximumFractionDigits: 6 })} {selectedToken}
+                        <button onClick={handleMax} className="text-blue-600 hover:text-blue-700 font-bold uppercase text-[10px] bg-blue-50 px-2 py-0.5 rounded-md">
+                            Max
+                        </button>
+                    </div>
+                </div>
                 <Input
                     type="number"
                     placeholder="0,00"
@@ -128,7 +160,7 @@ export function BridgeWidget() {
                 />
             </div>
 
-            {/* Status Feedback (Preserved & Adapted for Light Mode) */}
+            {/* Status Feedback */}
             {lastTxHash && (
                 <div className={`mb-4 p-4 rounded-lg flex flex-col gap-2 transition-colors border ${isConfirmed ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
                     <div className="flex items-center gap-2">
