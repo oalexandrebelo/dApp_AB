@@ -1,0 +1,15 @@
+# Antigravity Ignore File
+# Exclude heavy directories to prevent freezing/crashes during indexing
+
+node_modules/
+.next/
+dist/
+out/
+build/
+.git/
+contracts/out/
+contracts/cache/
+contracts/broadcast/
+.vscode/
+.idea/
+coverage/
