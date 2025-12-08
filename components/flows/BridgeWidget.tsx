@@ -70,6 +70,26 @@ export function BridgeWidget() {
             });
 
             setLastTxHash(txHash);
+
+            // Save to LocalStorage for History
+            const newTx = {
+                hash: txHash,
+                timestamp: Date.now(),
+                type: 'send',
+                token: selectedToken,
+                amount: amount,
+                status: 'success', // Presumed success once hash is returned for this simple valid. Real app would wait for receipt status.
+                to: recipient
+            };
+
+            const stored = localStorage.getItem("arc_transactions");
+            const history = stored ? JSON.parse(stored) : [];
+            history.push(newTx);
+            localStorage.setItem("arc_transactions", JSON.stringify(history));
+
+            // Notify other components
+            window.dispatchEvent(new Event('transaction-updated'));
+
             refetchBalance();
         } catch (error) {
             console.error("Transfer failed:", error);
