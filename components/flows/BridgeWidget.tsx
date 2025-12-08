@@ -42,7 +42,7 @@ export function BridgeWidget() {
 
     // Formatting Balance (Standard Circle tokens use 6 decimals)
     const decimals = 6;
-    const formattedBalance = balanceData ? formatUnits(balanceData, decimals) : "0.00";
+    const formattedBalance = balanceData ? formatUnits(balanceData as bigint, decimals) : "0.00";
 
     const handleSend = async () => {
         if (!isConnected) return;
@@ -93,8 +93,8 @@ export function BridgeWidget() {
                 <button
                     onClick={() => setSelectedToken("USDC")}
                     className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${selectedToken === "USDC"
-                            ? "border-blue-500 bg-blue-50"
-                            : "border-zinc-200 hover:border-zinc-300"
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-zinc-200 hover:border-zinc-300"
                         }`}
                 >
                     <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs mb-2">
@@ -106,8 +106,8 @@ export function BridgeWidget() {
                 <button
                     onClick={() => setSelectedToken("EURC")}
                     className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${selectedToken === "EURC"
-                            ? "border-blue-500 bg-blue-50"
-                            : "border-zinc-200 hover:border-zinc-300"
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-zinc-200 hover:border-zinc-300"
                         }`}
                 >
                     <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-xs mb-2">
