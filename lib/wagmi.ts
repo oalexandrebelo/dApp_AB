@@ -18,11 +18,11 @@ const arcTestnet = {
 export const config = createConfig({
     chains: [sepolia, arcTestnet, mainnet, base, arbitrum, polygon],
     ssr: true,
-    connectors: [
+    connectors: typeof window !== 'undefined' ? [
         injected(),
         walletConnect({ projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID' }),
         coinbaseWallet({ appName: 'Arc Network' }),
-    ],
+    ] : [],
     storage: createStorage({
         storage: cookieStorage,
     }),
