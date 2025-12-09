@@ -1,5 +1,5 @@
 
-export type TransactionType = 'send' | 'receive' | 'supply' | 'borrow';
+export type TransactionType = 'send' | 'receive' | 'supply' | 'withdraw' | 'borrow' | 'repay';
 export type TransactionStatus = 'pending' | 'success' | 'failed';
 
 export interface Transaction {

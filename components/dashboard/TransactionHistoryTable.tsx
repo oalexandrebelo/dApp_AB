@@ -90,24 +90,26 @@ export function TransactionHistoryTable() {
                             <TableRow key={tx.hash}>
                                 <TableCell>
                                     <div className="flex items-center gap-2">
-                                        <div className={`p-2 rounded-full ${tx.type === 'supply'
-                                            ? 'bg-green-500/10 text-green-500' // Supply = Green
-                                            : tx.type === 'borrow'
-                                                ? 'bg-indigo-500/10 text-indigo-500' // Borrow = Indigo
-                                                : 'bg-orange-500/10 text-orange-500' // Transfer/Send = Orange
+                                        <div className={`p-2 rounded-full ${tx.type === 'supply' ? 'bg-green-500/10 text-green-500' :
+                                                tx.type === 'withdraw' ? 'bg-orange-500/10 text-orange-500' :
+                                                    tx.type === 'borrow' ? 'bg-indigo-500/10 text-indigo-500' :
+                                                        tx.type === 'repay' ? 'bg-green-500/10 text-green-500' :
+                                                            'bg-orange-500/10 text-orange-500' // Transfer/Send
                                             }`}>
-                                            {tx.type === 'supply'
-                                                ? <ArrowUpRight className="h-4 w-4" />
-                                                : tx.type === 'borrow'
-                                                    ? <ArrowDownLeft className="h-4 w-4" />
-                                                    : <ExternalLink className="h-4 w-4" /> // Generic/Transfer
+                                            {tx.type === 'supply' ? <ArrowUpRight className="h-4 w-4" /> :
+                                                tx.type === 'withdraw' ? <ArrowDownLeft className="h-4 w-4" /> :
+                                                    tx.type === 'borrow' ? <ArrowDownLeft className="h-4 w-4" /> :
+                                                        tx.type === 'repay' ? <ArrowUpRight className="h-4 w-4" /> :
+                                                            <ExternalLink className="h-4 w-4" />
                                             }
                                         </div>
                                         <span className="font-medium capitalize">
                                             {tx.type === 'send' ? 'Transfer' :
                                                 tx.type === 'supply' ? 'Supply' :
-                                                    tx.type === 'borrow' ? 'Borrow' :
-                                                        tx.type}
+                                                    tx.type === 'withdraw' ? 'Withdraw' :
+                                                        tx.type === 'borrow' ? 'Borrow' :
+                                                            tx.type === 'repay' ? 'Repay' :
+                                                                tx.type}
                                         </span>
                                     </div>
                                 </TableCell>

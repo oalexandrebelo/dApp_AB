@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { SupplyModal } from "@/components/flows/SupplyModal";
 import { BorrowModal } from "@/components/flows/BorrowModal";
+import { WithdrawModal } from "@/components/flows/WithdrawModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useAccount, useReadContract } from "wagmi";
@@ -78,10 +79,10 @@ function AssetRow({ asset, activeTab, openModal, t }: any) {
 export function AssetTable({ mode }: { mode?: "supply" | "borrow" }) {
     const { t } = useLanguage();
     const [selectedAsset, setSelectedAsset] = useState<any>(null);
-    const [modalType, setModalType] = useState<"supply" | "borrow" | null>(null);
+    const [modalType, setModalType] = useState<"supply" | "borrow" | "withdraw" | null>(null);
     const [activeTab, setActiveTab] = useState<"supply" | "borrow">(mode || "supply");
 
-    const openModal = (asset: any, type: "supply" | "borrow") => {
+    const openModal = (asset: any, type: "supply" | "borrow" | "withdraw") => {
         setSelectedAsset(asset);
         setModalType(type);
     };
@@ -138,6 +139,14 @@ export function AssetTable({ mode }: { mode?: "supply" | "borrow" }) {
 
             {selectedAsset && modalType === "borrow" && (
                 <BorrowModal
+                    isOpen={true}
+                    onClose={closeModal}
+                    asset={selectedAsset}
+                />
+            )}
+
+            {selectedAsset && modalType === "withdraw" && (
+                <WithdrawModal
                     isOpen={true}
                     onClose={closeModal}
                     asset={selectedAsset}

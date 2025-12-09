@@ -5,6 +5,7 @@ import { ArrowUpRight, ArrowDownLeft, Wallet } from "lucide-react";
 import { HealthFactor } from "@/components/dashboard/HealthFactor";
 import { AssetTable } from "@/components/dashboard/AssetTable";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
+import { BorrowedAssetsTable } from "@/components/dashboard/BorrowedAssetsTable";
 import { useLanguage } from '@/lib/i18n';
 import { useAccount, useReadContracts } from "wagmi";
 import { formatUnits } from "viem";
@@ -107,19 +108,13 @@ export default function DashboardPage() {
                 <div className="col-span-1" id="sidebar-supply">
                     <AssetTable />
                 </div>
-                <Card className="col-span-1">
-                    <CardHeader>
-                        <CardTitle>{t.dashboard.assets.borrowed_title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="flex items-center justify-center h-40 text-muted-foreground">
-                            {totalBorrowed > 0.01 // Show if strictly positive
-                                ? <div className="text-2xl font-bold text-orange-400">${totalBorrowed.toLocaleString()}</div>
-                                : t.dashboard.assets.no_assets_borrowed
-                            }
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="col-span-1">
+                    <BorrowedAssetsTable
+                        borrowedUSDC={borrowedUSDC}
+                        borrowedEURC={borrowedEURC}
+                        borrowedUSYC={borrowedUSYC}
+                    />
+                </div>
             </div>
         </div>
     );
