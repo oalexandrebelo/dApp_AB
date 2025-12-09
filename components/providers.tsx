@@ -1,39 +1,12 @@
 "use client";
 
 import React from 'react';
-import { WagmiProvider, createConfig, http } from 'wagmi';
-import { mainnet, base, arbitrum, polygon, sepolia } from 'wagmi/chains';
+import { WagmiProvider, State } from 'wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RainbowKitProvider, getDefaultConfig, darkTheme } from '@rainbow-me/rainbowkit';
+import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit';
 import '@rainbow-me/rainbowkit/styles.css';
 import { LanguageProvider, useLanguage } from '@/lib/i18n';
-
-const arcTestnet = {
-    id: 5042002,
-    name: 'Arc Testnet',
-    nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 },
-    rpcUrls: {
-        default: { http: ['https://rpc.testnet.arc.network'] },
-    },
-    blockExplorers: {
-        default: { name: 'ArcScan', url: 'https://testnet.arcscan.app' },
-    },
-} as const;
-
-const config = getDefaultConfig({
-    appName: 'Arc Network',
-    projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID',
-    chains: [sepolia, arcTestnet, mainnet, base, arbitrum, polygon],
-    ssr: true,
-    transports: {
-        [sepolia.id]: http(),
-        [arcTestnet.id]: http(),
-        [mainnet.id]: http(),
-        [base.id]: http(),
-        [arbitrum.id]: http(),
-        [polygon.id]: http(),
-    },
-});
+import { config } from '@/lib/wagmi';
 
 const queryClient = new QueryClient();
 
@@ -61,9 +34,15 @@ function RainbowKitLocalizer({ children }: { children: React.ReactNode }) {
     );
 }
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({
+    children,
+    initialState
+}: {
+    children: React.ReactNode;
+    initialState?: State;
+}) {
     return (
-        <WagmiProvider config={config}>
+        <WagmiProvider config={config} initialState={initialState}>
             <QueryClientProvider client={queryClient}>
                 <LanguageProvider>
                     <RainbowKitLocalizer>
