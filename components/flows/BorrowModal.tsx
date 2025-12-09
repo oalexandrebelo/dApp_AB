@@ -11,7 +11,17 @@ import { LENDING_POOL_ADDRESS, LENDING_POOL_ABI } from "@/lib/contracts";
 import { useLanguage } from '@/lib/i18n';
 import { saveTransaction } from "@/lib/history";
 
-// ... imports remain the same ...
+interface BorrowModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    asset: {
+        symbol: string;
+        balance: string;
+        variableApy: string;
+        address: `0x${string}`;
+        decimals: number;
+    };
+}
 
 export function BorrowModal({ isOpen, onClose, asset }: BorrowModalProps) {
     const { t } = useLanguage();
