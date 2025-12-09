@@ -37,8 +37,27 @@ export function BorrowModal({ isOpen, onClose, asset }: BorrowModalProps) {
     useEffect(() => {
         if (isConfirmed) {
             setStep("success");
+
+            // Save to History
+            const newTx = {
+                hash: hash,
+                timestamp: Date.now(),
+                type: 'receive', // 'receive' because we are borrowing (receiving funds)
+                token: asset.symbol,
+                amount: amount,
+                status: 'success',
+                to: address
+            };
+
+            const stored = localStorage.getItem("arc_transactions");
+            const history = stored ? JSON.parse(stored) : [];
+            history.unshift(newTx);
+            localStorage.setItem("arc_transactions", JSON.stringify(history));
+
+            // Dispatch event to update table
+            window.dispatchEvent(new Event('transaction-updated'));
         }
-    }, [isConfirmed]);
+    }, [isConfirmed, hash, amount, asset.symbol, address]);
 
     const handleBorrow = async () => {
         setStep("confirming");

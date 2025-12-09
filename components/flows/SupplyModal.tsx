@@ -75,9 +75,28 @@ export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
                 setStep("approved_waiting"); // Move to intermediate step
             } else if (step === "supplying") {
                 setStep("success");
+
+                // Save to History
+                const newTx = {
+                    hash: hash,
+                    timestamp: Date.now(),
+                    type: 'send', // 'send' because we are depositing
+                    token: asset.symbol,
+                    amount: amount,
+                    status: 'success',
+                    to: LENDING_POOL_ADDRESS
+                };
+
+                const stored = localStorage.getItem("arc_transactions");
+                const history = stored ? JSON.parse(stored) : [];
+                history.unshift(newTx);
+                localStorage.setItem("arc_transactions", JSON.stringify(history));
+
+                // Dispatch event to update table
+                window.dispatchEvent(new Event('transaction-updated'));
             }
         }
-    }, [isConfirmed, step]);
+    }, [isConfirmed, step, hash, amount, asset.symbol]);
 
     return (
         <Modal isOpen={isOpen} onClose={reset} title={`${t.modals.supply.title}: ${asset?.symbol}`}>
