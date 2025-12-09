@@ -15,16 +15,7 @@ import { Badge } from "@/components/ui/badge";
 
 import { useAccount } from "wagmi";
 
-export type Transaction = {
-    hash: string;
-    timestamp: number;
-    type: 'send' | 'receive' | 'supply' | 'borrow';
-    token: 'USDC' | 'EURC';
-    amount: string;
-    status: 'pending' | 'success' | 'failed';
-    to: string;
-    user?: string;
-};
+import { Transaction, getTransactions } from "@/lib/history";
 
 export function TransactionHistoryTable() {
     const { address } = useAccount();
@@ -36,26 +27,8 @@ export function TransactionHistoryTable() {
                 setTransactions([]);
                 return;
             }
-
-            const stored = localStorage.getItem("arc_transactions");
-            if (stored) {
-                try {
-                    const parsed: Transaction[] = JSON.parse(stored);
-
-                    // Filter by current user address (or show all if legacy/undefined for now? No, user wants privacy)
-                    // We will only show transactions that explicitly match the user OR are legacy (we might want to migrate legacy, but hiding is safer for "leak")
-                    // Actually, if we hide legacy, the user loses history. 
-                    // Let's match if tx.user === address. 
-                    const userTransactions = parsed.filter(tx =>
-                        tx.user && tx.user.toLowerCase() === address.toLowerCase()
-                    );
-
-                    // Sort by newest first
-                    setTransactions(userTransactions.sort((a, b) => b.timestamp - a.timestamp));
-                } catch (e) {
-                    console.error("Failed to parse transactions", e);
-                }
-            }
+            const txs = getTransactions(address);
+            setTransactions(txs);
         };
 
         loadTransactions();
@@ -68,7 +41,7 @@ export function TransactionHistoryTable() {
             window.removeEventListener('storage', loadTransactions);
             window.removeEventListener('transaction-updated', loadTransactions);
         };
-    }, [address]); // Re-run when address changes
+    }, [address]);
 
     if (transactions.length === 0) {
         return (

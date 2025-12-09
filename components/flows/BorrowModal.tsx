@@ -9,19 +9,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useWriteContract, useWaitForTransactionReceipt, useAccount } from "wagmi";
 import { LENDING_POOL_ADDRESS, LENDING_POOL_ABI } from "@/lib/contracts";
 import { useLanguage } from '@/lib/i18n';
+import { saveTransaction } from "@/lib/history";
 
-interface BorrowModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    asset: {
-        symbol: string;
-        variableApy?: string;
-        stableApy?: string;
-        liquidity: string;
-        address: `0x${string}`;
-        decimals: number;
-    };
-}
+// ... imports remain the same ...
 
 export function BorrowModal({ isOpen, onClose, asset }: BorrowModalProps) {
     const { t } = useLanguage();
@@ -34,10 +24,6 @@ export function BorrowModal({ isOpen, onClose, asset }: BorrowModalProps) {
         hash,
     });
 
-    import { saveTransaction } from "@/lib/history";
-
-    // ... inside useEffect ...
-
     useEffect(() => {
         if (isConfirmed && hash && address) {
             setStep("success");
@@ -45,7 +31,7 @@ export function BorrowModal({ isOpen, onClose, asset }: BorrowModalProps) {
             // Save to History via helper
             saveTransaction({
                 hash: hash,
-                type: 'borrow', // 'receive' mapped to 'borrow' in UI logic, keeping 'borrow' type here is better for clarity now
+                type: 'borrow',
                 token: asset.symbol,
                 amount: amount,
                 status: 'success',

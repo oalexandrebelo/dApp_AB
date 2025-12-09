@@ -69,6 +69,10 @@ export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
         onClose();
     };
 
+    import { saveTransaction } from "@/lib/history";
+
+    // ... inside useEffect ...
+
     useEffect(() => {
         if (isConfirmed) {
             if (step === "approving") {
@@ -76,28 +80,21 @@ export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
             } else if (step === "supplying") {
                 setStep("success");
 
-                // Save to History
-                const newTx = {
-                    hash: hash,
-                    timestamp: Date.now(),
-                    type: 'supply',
-                    token: asset.symbol,
-                    amount: amount,
-                    status: 'success',
-                    to: LENDING_POOL_ADDRESS,
-                    user: address // Save user address for filtering
-                };
-
-                const stored = localStorage.getItem("arc_transactions");
-                const history = stored ? JSON.parse(stored) : [];
-                history.unshift(newTx);
-                localStorage.setItem("arc_transactions", JSON.stringify(history));
-
-                // Dispatch event to update table
-                window.dispatchEvent(new Event('transaction-updated'));
+                // Save to History via helper
+                if (hash && address) {
+                    saveTransaction({
+                        hash: hash,
+                        type: 'supply',
+                        token: asset.symbol,
+                        amount: amount,
+                        status: 'success',
+                        to: LENDING_POOL_ADDRESS,
+                        user: address
+                    });
+                }
             }
         }
-    }, [isConfirmed, step, hash, amount, asset.symbol]);
+    }, [isConfirmed, step, hash, amount, asset.symbol, address]);
 
     return (
         <Modal isOpen={isOpen} onClose={reset} title={`${t.modals.supply.title}: ${asset?.symbol}`}>
