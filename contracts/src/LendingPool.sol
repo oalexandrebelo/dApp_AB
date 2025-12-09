@@ -29,13 +29,36 @@ contract LendingPool {
     event Borrow(address indexed user, address indexed asset, uint256 amount);
     event Repay(address indexed user, address indexed asset, uint256 amount);
 
-    constructor() {}
 
-    function setBorrowingEngine(address _engine) external {
+
+    // Ownership & Revenue
+    address public owner;
+    address public treasury;
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only Owner");
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender;
+        treasury = msg.sender; // Default treasury is owner
+    }
+
+    function setTreasury(address _treasury) external onlyOwner {
+        treasury = _treasury;
+    }
+
+    // Emergency/Fee Withdrawal
+    function rescueFunds(address asset, uint256 amount) external onlyOwner {
+        IERC20(asset).transfer(owner, amount);
+    }
+
+    function setBorrowingEngine(address _engine) external onlyOwner {
         borrowingEngine = BorrowingEngine(_engine);
     }
     
-    function setRiskManager(address _riskManager) external {
+    function setRiskManager(address _riskManager) external onlyOwner {
         riskManager = RiskManager(_riskManager);
     }
 
@@ -89,8 +112,9 @@ contract LendingPool {
             riskManager.validateBorrow(asset);
         }
 
-        // Validation via Engine
-        // require(borrowingEngine.validateBorrow(onBehalfOf, asset, amount), "Borrow validation failed: check collateral");
+        // Check Pool Liquidity
+        uint256 poolBalance = IERC20(asset).balanceOf(address(this));
+        require(poolBalance >= amount, "Insufficient Pool Liquidity: Supply assets first!");
 
         _userBorrowed[onBehalfOf][asset] += amount;
         totalBorrowed[asset] += amount;
