@@ -46,7 +46,8 @@ export function BorrowModal({ isOpen, onClose, asset }: BorrowModalProps) {
                 token: asset.symbol,
                 amount: amount,
                 status: 'success',
-                to: address
+                to: address,
+                user: address // Save user address for filtering
             };
 
             const stored = localStorage.getItem("arc_transactions");

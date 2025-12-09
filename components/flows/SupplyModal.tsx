@@ -84,7 +84,8 @@ export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
                     token: asset.symbol,
                     amount: amount,
                     status: 'success',
-                    to: LENDING_POOL_ADDRESS
+                    to: LENDING_POOL_ADDRESS,
+                    user: address // Save user address for filtering
                 };
 
                 const stored = localStorage.getItem("arc_transactions");
