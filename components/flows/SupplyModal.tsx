@@ -24,7 +24,7 @@ interface SupplyModalProps {
 
 export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
     const { t } = useLanguage();
-    const { isConnected } = useAccount();
+    const { address, isConnected } = useAccount();
     const [amount, setAmount] = useState("");
     const [step, setStep] = useState<"input" | "review" | "approving" | "approved_waiting" | "supplying" | "success">("input");
     const [slippage, setSlippage] = useState("0.5");
