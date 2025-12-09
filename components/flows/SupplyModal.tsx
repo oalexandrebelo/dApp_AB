@@ -80,7 +80,7 @@ export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
                 const newTx = {
                     hash: hash,
                     timestamp: Date.now(),
-                    type: 'send', // 'send' because we are depositing
+                    type: 'supply',
                     token: asset.symbol,
                     amount: amount,
                     status: 'success',
