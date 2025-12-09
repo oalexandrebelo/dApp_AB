@@ -59,7 +59,7 @@ export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
             args: [
                 asset.address,
                 BigInt(parseFloat(amount) * Math.pow(10, asset.decimals) || 0),
-                "0x0000000000000000000000000000000000000000",
+                address!, // Use actual user address
                 0
             ],
         });

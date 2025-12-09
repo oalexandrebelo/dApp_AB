@@ -62,7 +62,7 @@ export function BorrowModal({ isOpen, onClose, asset }: BorrowModalProps) {
                 BigInt(parseFloat(amount) * Math.pow(10, asset.decimals) || 0),
                 BigInt(2), // Variable Interest
                 0,
-                "0x0000000000000000000000000000000000000000"
+                address! // Use actual user address
             ],
         });
     };
