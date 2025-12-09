@@ -1,7 +1,7 @@
 
-import { getDefaultConfig } from '@rainbow-me/rainbowkit';
+import { http, createConfig, cookieStorage, createStorage } from 'wagmi';
 import { mainnet, base, arbitrum, polygon, sepolia } from 'wagmi/chains';
-import { http, createStorage, cookieStorage } from 'wagmi';
+import { injected, coinbaseWallet, walletConnect } from 'wagmi/connectors';
 
 const arcTestnet = {
     id: 5042002,
@@ -15,9 +15,7 @@ const arcTestnet = {
     },
 } as const;
 
-export const config = getDefaultConfig({
-    appName: 'Arc Network',
-    projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID',
+export const config = createConfig({
     chains: [sepolia, arcTestnet, mainnet, base, arbitrum, polygon],
     ssr: true,
     storage: createStorage({
