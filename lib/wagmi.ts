@@ -20,7 +20,7 @@ export const config = createConfig({
     ssr: true,
     connectors: typeof window !== 'undefined' ? [
         injected(),
-        walletConnect({ projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID' }),
+        walletConnect({ projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '3f7b3ba39041babbec36fe69d114fcb' }), // Fallback to avoid crash
         coinbaseWallet({ appName: 'Arc Network' }),
     ] : [],
     storage: createStorage({

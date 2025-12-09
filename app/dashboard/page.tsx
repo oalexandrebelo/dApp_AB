@@ -14,7 +14,7 @@ export default function DashboardPage() {
     const { t } = useLanguage();
     const { address, isConnected } = useAccount();
 
-    const { data: results } = useReadContracts({
+    const { data: results, refetch, isRefetching } = useReadContracts({
         contracts: [
             // Wallet Balances
             { address: USDC_ADDRESS, abi: ERC20_ABI, functionName: 'balanceOf', args: [address!] },
@@ -33,7 +33,7 @@ export default function DashboardPage() {
         ],
         query: {
             enabled: !!address,
-            refetchInterval: 5000
+            refetchInterval: 10000 // Less aggressive automatic refresh
         }
     });
 
@@ -67,15 +67,27 @@ export default function DashboardPage() {
     let healthFactor = 999; // Infinite by default
     if (totalBorrowed > 0) {
         healthFactor = (totalSupplied * LIQUIDATION_THRESHOLD) / totalBorrowed;
-    } else if (totalSupplied === 0) {
-        healthFactor = 0; // Or standard starting value
     }
+
+    const handleRefresh = () => {
+        if (refetch) refetch();
+    };
 
     return (
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight">{t.dashboard.header.title}</h2>
+                    <div className="flex items-center gap-3">
+                        <h2 className="text-3xl font-bold tracking-tight">{t.dashboard.header.title}</h2>
+                        <button
+                            onClick={handleRefresh}
+                            disabled={isRefetching}
+                            className={`p-2 rounded-full hover:bg-muted transition-colors ${isRefetching ? 'animate-spin opacity-50' : ''}`}
+                            title="Refresh Data"
+                        >
+                            <ArrowUpRight className={`h-5 w-5 ${isRefetching ? '' : 'rotate-45'}`} />
+                        </button>
+                    </div>
                     <p className="text-muted-foreground">{t.dashboard.header.subtitle}</p>
                 </div>
                 <div className="w-full md:w-80 health-factor">
@@ -101,7 +113,7 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-center justify-center h-40 text-muted-foreground">
-                            {totalBorrowed > 0
+                            {totalBorrowed > 0.01 // Show if strictly positive
                                 ? <div className="text-2xl font-bold text-orange-400">${totalBorrowed.toLocaleString()}</div>
                                 : t.dashboard.assets.no_assets_borrowed
                             }

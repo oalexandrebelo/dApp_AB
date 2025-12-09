@@ -90,19 +90,24 @@ export function TransactionHistoryTable() {
                             <TableRow key={tx.hash}>
                                 <TableCell>
                                     <div className="flex items-center gap-2">
-                                        <div className={`p-2 rounded-full ${tx.type === 'send' || tx.type === 'supply'
-                                            ? 'bg-orange-500/10 text-orange-500'
-                                            : 'bg-green-500/10 text-green-500'
+                                        <div className={`p-2 rounded-full ${tx.type === 'supply'
+                                            ? 'bg-green-500/10 text-green-500' // Supply = Green
+                                            : tx.type === 'borrow'
+                                                ? 'bg-indigo-500/10 text-indigo-500' // Borrow = Indigo
+                                                : 'bg-orange-500/10 text-orange-500' // Transfer/Send = Orange
                                             }`}>
-                                            {tx.type === 'send' || tx.type === 'supply'
+                                            {tx.type === 'supply'
                                                 ? <ArrowUpRight className="h-4 w-4" />
-                                                : <ArrowDownLeft className="h-4 w-4" />
+                                                : tx.type === 'borrow'
+                                                    ? <ArrowDownLeft className="h-4 w-4" />
+                                                    : <ExternalLink className="h-4 w-4" /> // Generic/Transfer
                                             }
                                         </div>
                                         <span className="font-medium capitalize">
-                                            {(tx.type === 'supply' || tx.type === 'send') ? 'Send Supply' :
-                                                (tx.type === 'borrow' || tx.type === 'receive') ? 'Receive Borrow' :
-                                                    tx.type}
+                                            {tx.type === 'send' ? 'Transfer' :
+                                                tx.type === 'supply' ? 'Supply' :
+                                                    tx.type === 'borrow' ? 'Borrow' :
+                                                        tx.type}
                                         </span>
                                     </div>
                                 </TableCell>
