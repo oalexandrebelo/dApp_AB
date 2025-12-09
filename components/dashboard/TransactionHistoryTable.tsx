@@ -31,8 +31,8 @@ export type Transaction = {
             <TableCell>
                 <div className="flex items-center gap-2">
                     <div className={`p-2 rounded-full ${tx.type === 'send' || tx.type === 'supply'
-                            ? 'bg-orange-500/10 text-orange-500'
-                            : 'bg-green-500/10 text-green-500'
+                        ? 'bg-orange-500/10 text-orange-500'
+                        : 'bg-green-500/10 text-green-500'
                         }`}>
                         {tx.type === 'send' || tx.type === 'supply'
                             ? <ArrowUpRight className="h-4 w-4" />
@@ -40,8 +40,8 @@ export type Transaction = {
                         }
                     </div>
                     <span className="font-medium capitalize">
-                        {tx.type === 'supply' ? 'Send Supply' :
-                            tx.type === 'borrow' ? 'Receive Borrow' :
+                        {(tx.type === 'supply' || tx.type === 'send') ? 'Send Supply' :
+                            (tx.type === 'borrow' || tx.type === 'receive') ? 'Receive Borrow' :
                                 tx.type}
                     </span>
                 </div>
