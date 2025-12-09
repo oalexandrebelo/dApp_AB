@@ -75,11 +75,11 @@ function AssetRow({ asset, activeTab, openModal, t }: any) {
     );
 }
 
-export function AssetTable() {
+export function AssetTable({ mode }: { mode?: "supply" | "borrow" }) {
     const { t } = useLanguage();
     const [selectedAsset, setSelectedAsset] = useState<any>(null);
     const [modalType, setModalType] = useState<"supply" | "borrow" | null>(null);
-    const [activeTab, setActiveTab] = useState<"supply" | "borrow">("supply");
+    const [activeTab, setActiveTab] = useState<"supply" | "borrow">(mode || "supply");
 
     const openModal = (asset: any, type: "supply" | "borrow") => {
         setSelectedAsset(asset);
@@ -96,20 +96,22 @@ export function AssetTable() {
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle>{t.dashboard.assets.title}</CardTitle>
-                    <div className="flex bg-secondary/50 p-1 rounded-lg">
-                        <button
-                            onClick={() => setActiveTab("supply")}
-                            className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", activeTab === "supply" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
-                        >
-                            {t.dashboard.sidebar.supply}
-                        </button>
-                        <button
-                            onClick={() => setActiveTab("borrow")}
-                            className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", activeTab === "borrow" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
-                        >
-                            {t.dashboard.sidebar.borrow}
-                        </button>
-                    </div>
+                    {!mode && (
+                        <div className="flex bg-secondary/50 p-1 rounded-lg">
+                            <button
+                                onClick={() => setActiveTab("supply")}
+                                className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", activeTab === "supply" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
+                            >
+                                {t.dashboard.sidebar.supply}
+                            </button>
+                            <button
+                                onClick={() => setActiveTab("borrow")}
+                                className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", activeTab === "borrow" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
+                            >
+                                {t.dashboard.sidebar.borrow}
+                            </button>
+                        </div>
+                    )}
                 </CardHeader>
                 <CardContent className="p-0">
                     <div className="divide-y divide-border">

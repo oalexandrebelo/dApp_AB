@@ -12,7 +12,7 @@ export default function BorrowPage() {
                 <h1 className="text-3xl font-bold tracking-tight">{t.dashboard.borrow_page.title}</h1>
                 <p className="text-muted-foreground">{t.dashboard.borrow_page.subtitle}</p>
             </div>
-            <AssetTable />
+            <AssetTable mode="borrow" />
         </div>
     );
 }
