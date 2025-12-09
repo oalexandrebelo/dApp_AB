@@ -139,7 +139,7 @@ export function RepayModal({ isOpen, onClose, asset }: RepayModalProps) {
                         </motion.div>
                     )}
 
-                    {(step === "approving" || step === "approved_waiting") && (
+                    {step === "approving" && (
                         <motion.div
                             key="approving"
                             initial={{ opacity: 0 }}
@@ -147,17 +147,28 @@ export function RepayModal({ isOpen, onClose, asset }: RepayModalProps) {
                             className="text-center py-8"
                         >
                             <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-indigo-500" />
-                            <h3 className="text-lg font-semibold mb-2">
-                                {step === "approving" ? "Approving..." : "Approval Confirmed"}
-                            </h3>
-                            <p className="text-sm text-muted-foreground mb-4">
-                                {step === "approving" ? "Confirm approval in your wallet" : "Waiting for next step..."}
-                            </p>
-                            {step === "approved_waiting" && (
-                                <Button onClick={handleRepay} className="w-full">
-                                    Continue to Repay
-                                </Button>
-                            )}
+                            <h3 className="text-lg font-semibold mb-2">Approving...</h3>
+                            <p className="text-sm text-muted-foreground">Confirm approval in your wallet</p>
+                        </motion.div>
+                    )}
+
+                    {step === "approved_waiting" && (
+                        <motion.div
+                            key="approved_waiting"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="text-center py-8 space-y-6"
+                        >
+                            <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto" />
+                            <div>
+                                <h3 className="text-xl font-bold mb-2">Approval Confirmed!</h3>
+                                <p className="text-sm text-muted-foreground">
+                                    Now proceed to repay your loan
+                                </p>
+                            </div>
+                            <Button onClick={handleRepay} className="w-full bg-green-500 hover:bg-green-600">
+                                Continue to Repay
+                            </Button>
                         </motion.div>
                     )}
 
