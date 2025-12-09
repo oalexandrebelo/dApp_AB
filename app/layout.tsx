@@ -13,12 +13,13 @@ export const metadata: Metadata = {
     description: 'Premium DeFi Lending & Borrowing',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
-    const cookie = headers().get('cookie');
+    const headersList = await headers();
+    const cookie = headersList.get('cookie');
     const initialState = cookieToInitialState(config, cookie);
 
     return (
