@@ -13,6 +13,16 @@ import { useLanguage } from '@/lib/i18n';
 import { saveTransaction } from "@/lib/history";
 
 interface SupplyModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    asset: {
+        symbol: string;
+        balance: string;
+        apy: string;
+        address: `0x${string}`;
+        decimals: number;
+    };
+}
 
 export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
     const { t } = useLanguage();
