@@ -25,7 +25,7 @@ interface BorrowModalProps {
 
 export function BorrowModal({ isOpen, onClose, asset }: BorrowModalProps) {
     const { t } = useLanguage();
-    const { isConnected } = useAccount();
+    const { address, isConnected } = useAccount();
     const [amount, setAmount] = useState("");
     const [step, setStep] = useState<"input" | "confirming" | "success">("input");
 
