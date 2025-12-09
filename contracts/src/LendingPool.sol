@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import "./BorrowingEngine.sol";
 import "./RiskManager.sol";
+import "./IERC20.sol";
 
 /**
  * @title LendingPool
@@ -52,7 +53,9 @@ contract LendingPool {
             riskManager.validateSupply(asset, totalSupplied[asset] + amount);
         }
         
-        // In prod: IERC20(asset).safeTransferFrom(msg.sender, address(this), amount);
+        // REAL LOGIC: Transfer tokens from user to pool
+        bool success = IERC20(asset).transferFrom(msg.sender, address(this), amount);
+        require(success, "Transfer failed");
         
         _userSupplied[onBehalfOf][asset] += amount;
         totalSupplied[asset] += amount;
@@ -68,13 +71,12 @@ contract LendingPool {
             riskManager.validateWithdraw(asset);
         }
         
-        // Check if withdraw leaves user with HF < 1? (If they have borrows)
-        // borrowingEngine.validateWithdraw(...)
-
         _userSupplied[msg.sender][asset] -= amount;
         totalSupplied[asset] -= amount;
 
-        // In prod: IERC20(asset).safeTransfer(to, amount);
+        // REAL LOGIC: Transfer tokens from pool to user
+        bool success = IERC20(asset).transfer(to, amount);
+        require(success, "Transfer failed");
         
         emit Withdraw(msg.sender, asset, amount);
     }
@@ -93,13 +95,17 @@ contract LendingPool {
         _userBorrowed[onBehalfOf][asset] += amount;
         totalBorrowed[asset] += amount;
 
-        // In prod: IERC20(asset).safeTransfer(onBehalfOf, amount);
+        // REAL LOGIC: Transfer tokens from pool to borrower
+        bool success = IERC20(asset).transfer(onBehalfOf, amount);
+        require(success, "Transfer failed");
 
         emit Borrow(onBehalfOf, asset, amount);
     }
 
     function repay(address asset, uint256 amount, address onBehalfOf) external {
-        // In prod: IERC20(asset).safeTransferFrom(msg.sender, address(this), amount);
+        // REAL LOGIC: Transfer tokens from payer to pool
+        bool success = IERC20(asset).transferFrom(msg.sender, address(this), amount);
+        require(success, "Transfer failed");
         
         uint256 currentDebt = _userBorrowed[onBehalfOf][asset];
         uint256 repayAmount = amount > currentDebt ? currentDebt : amount;
