@@ -11,6 +11,7 @@ import { formatUnits, parseUnits } from "viem";
 import { saveTransaction } from "@/lib/history";
 
 export function BridgeWidget() {
+    // Fix verified: Hooks are present
     const { address, isConnected } = useAccount();
     const { writeContractAsync } = useWriteContract();
 
