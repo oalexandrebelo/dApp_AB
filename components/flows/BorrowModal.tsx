@@ -34,29 +34,24 @@ export function BorrowModal({ isOpen, onClose, asset }: BorrowModalProps) {
         hash,
     });
 
+    import { saveTransaction } from "@/lib/history";
+
+    // ... inside useEffect ...
+
     useEffect(() => {
-        if (isConfirmed) {
+        if (isConfirmed && hash && address) {
             setStep("success");
 
-            // Save to History
-            const newTx = {
+            // Save to History via helper
+            saveTransaction({
                 hash: hash,
-                timestamp: Date.now(),
-                type: 'receive', // 'receive' because we are borrowing (receiving funds)
+                type: 'borrow', // 'receive' mapped to 'borrow' in UI logic, keeping 'borrow' type here is better for clarity now
                 token: asset.symbol,
                 amount: amount,
                 status: 'success',
                 to: address,
-                user: address // Save user address for filtering
-            };
-
-            const stored = localStorage.getItem("arc_transactions");
-            const history = stored ? JSON.parse(stored) : [];
-            history.unshift(newTx);
-            localStorage.setItem("arc_transactions", JSON.stringify(history));
-
-            // Dispatch event to update table
-            window.dispatchEvent(new Event('transaction-updated'));
+                user: address
+            });
         }
     }, [isConfirmed, hash, amount, asset.symbol, address]);
 

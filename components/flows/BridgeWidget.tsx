@@ -71,25 +71,26 @@ export function BridgeWidget() {
 
             setLastTxHash(txHash);
 
-            // Save to LocalStorage for History
-            const newTx = {
-                hash: txHash,
-                timestamp: Date.now(),
-                type: 'send',
-                token: selectedToken,
-                amount: amount,
-                status: 'success', // Presumed success once hash is returned for this simple valid. Real app would wait for receipt status.
-                to: recipient,
-                user: address // Save user address for filtering
-            };
+            import { saveTransaction } from "@/lib/history";
 
-            const stored = localStorage.getItem("arc_transactions");
-            const history = stored ? JSON.parse(stored) : [];
-            history.unshift(newTx);
-            localStorage.setItem("arc_transactions", JSON.stringify(history));
+            // ... inside try block ...
 
-            // Notify other components
-            window.dispatchEvent(new Event('transaction-updated'));
+            setLastTxHash(txHash);
+
+            // Save to LocalStorage for History using helper
+            if (address) {
+                saveTransaction({
+                    hash: txHash,
+                    type: 'send',
+                    token: selectedToken,
+                    amount: amount,
+                    status: 'success',
+                    to: recipient,
+                    user: address
+                });
+            }
+
+            refetchBalance();
 
             refetchBalance();
         } catch (error) {
