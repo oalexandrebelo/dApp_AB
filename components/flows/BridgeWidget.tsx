@@ -79,12 +79,13 @@ export function BridgeWidget() {
                 token: selectedToken,
                 amount: amount,
                 status: 'success', // Presumed success once hash is returned for this simple valid. Real app would wait for receipt status.
-                to: recipient
+                to: recipient,
+                user: address // Save user address for filtering
             };
 
             const stored = localStorage.getItem("arc_transactions");
             const history = stored ? JSON.parse(stored) : [];
-            history.push(newTx);
+            history.unshift(newTx);
             localStorage.setItem("arc_transactions", JSON.stringify(history));
 
             // Notify other components
