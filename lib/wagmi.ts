@@ -23,7 +23,7 @@ const arcTestnet = {
 
 const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '3f7b3ba39041babbec36fe69d114fcb';
 
-const connectors = connectorsForWallets(
+const connectors = typeof window !== 'undefined' ? connectorsForWallets(
     [
         {
             groupName: 'Popular',
@@ -39,7 +39,7 @@ const connectors = connectorsForWallets(
         appName: 'Arc Network',
         projectId,
     }
-);
+) : [];
 
 export const config = createConfig({
     chains: [sepolia, arcTestnet, mainnet, base, arbitrum, polygon],
