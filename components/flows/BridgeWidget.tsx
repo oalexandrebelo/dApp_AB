@@ -11,6 +11,41 @@ import { formatUnits, parseUnits } from "viem";
 import { saveTransaction } from "@/lib/history";
 
 export function BridgeWidget() {
+    const { address, isConnected } = useAccount();
+    const { writeContractAsync } = useWriteContract();
+
+    // State
+    const [selectedToken, setSelectedToken] = useState<"USDC" | "EURC">("USDC");
+    const [recipient, setRecipient] = useState("");
+    const [amount, setAmount] = useState("");
+    const [isTransferring, setIsTransferring] = useState(false);
+    const [lastTxHash, setLastTxHash] = useState<`0x${string}` | undefined>(undefined);
+
+    // Transaction Monitoring
+    const { isSuccess: isConfirmed } = useWaitForTransactionReceipt({
+        hash: lastTxHash,
+    });
+
+    const getTokenAddress = () => {
+        return selectedToken === "USDC" ? USDC_ADDRESS : EURC_ADDRESS;
+    };
+
+    // Balance Fetching
+    const { data: balanceData, refetch: refetchBalance } = useReadContract({
+        address: getTokenAddress() as `0x${string}`,
+        abi: ERC20_ABI,
+        functionName: 'balanceOf',
+        args: [address!],
+        query: {
+            enabled: !!address,
+            refetchInterval: 5000
+        }
+    });
+
+    // Formatting Balance (Standard Circle tokens use 6 decimals)
+    const decimals = 6;
+    const formattedBalance = balanceData ? formatUnits(balanceData as bigint, decimals) : "0.00";
+
     const handleSend = async () => {
         if (!isConnected) return;
         if (!recipient || !amount) {
