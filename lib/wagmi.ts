@@ -1,7 +1,13 @@
 
 import { http, createConfig, cookieStorage, createStorage } from 'wagmi';
 import { mainnet, base, arbitrum, polygon, sepolia } from 'wagmi/chains';
-import { injected, coinbaseWallet, walletConnect } from 'wagmi/connectors';
+import { connectorsForWallets } from '@rainbow-me/rainbowkit';
+import {
+    rainbowWallet,
+    metaMaskWallet,
+    coinbaseWallet,
+    walletConnectWallet,
+} from '@rainbow-me/rainbowkit/wallets';
 
 const arcTestnet = {
     id: 5042002,
@@ -15,14 +21,30 @@ const arcTestnet = {
     },
 } as const;
 
+const projectId = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '3f7b3ba39041babbec36fe69d114fcb';
+
+const connectors = connectorsForWallets(
+    [
+        {
+            groupName: 'Popular',
+            wallets: [
+                rainbowWallet,
+                coinbaseWallet,
+                metaMaskWallet,
+                walletConnectWallet,
+            ],
+        },
+    ],
+    {
+        appName: 'Arc Network',
+        projectId,
+    }
+);
+
 export const config = createConfig({
     chains: [sepolia, arcTestnet, mainnet, base, arbitrum, polygon],
     ssr: true,
-    connectors: typeof window !== 'undefined' ? [
-        injected(),
-        walletConnect({ projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '3f7b3ba39041babbec36fe69d114fcb' }), // Fallback to avoid crash
-        coinbaseWallet({ appName: 'Arc Network' }),
-    ] : [],
+    connectors,
     storage: createStorage({
         storage: cookieStorage,
     }),
