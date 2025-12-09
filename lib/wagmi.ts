@@ -15,22 +15,23 @@ const arcTestnet = {
     },
 } as const;
 
-chains: [sepolia, arcTestnet, mainnet, base, arbitrum, polygon],
+export const config = createConfig({
+    chains: [sepolia, arcTestnet, mainnet, base, arbitrum, polygon],
     ssr: true,
-        connectors: [
-            injected(),
-            walletConnect({ projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID' }),
-            coinbaseWallet({ appName: 'Arc Network' }),
-        ],
-            storage: createStorage({
-                storage: cookieStorage,
-            }),
-                transports: {
-    [sepolia.id]: http(),
+    connectors: [
+        injected(),
+        walletConnect({ projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID' }),
+        coinbaseWallet({ appName: 'Arc Network' }),
+    ],
+    storage: createStorage({
+        storage: cookieStorage,
+    }),
+    transports: {
+        [sepolia.id]: http(),
         [arcTestnet.id]: http(),
-            [mainnet.id]: http(),
-                [base.id]: http(),
-                    [arbitrum.id]: http(),
-                        [polygon.id]: http(),
+        [mainnet.id]: http(),
+        [base.id]: http(),
+        [arbitrum.id]: http(),
+        [polygon.id]: http(),
     },
 });
