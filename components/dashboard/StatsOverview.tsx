@@ -1,62 +1,19 @@
 "use client";
 
+// ... imports
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, ArrowUpRight, ArrowDownLeft } from "lucide-react";
-import { useAccount, useReadContracts } from "wagmi";
-import { formatUnits } from "viem";
-import { USDC_ADDRESS, EURC_ADDRESS, USYC_ADDRESS, ERC20_ABI, LENDING_POOL_ADDRESS, LENDING_POOL_ABI } from "@/lib/contracts";
 import { useLanguage } from '@/lib/i18n';
 
-export function StatsOverview() {
-    const { address, isConnected } = useAccount();
+interface StatsOverviewProps {
+    netWorth: number;
+    totalSupplied: number;
+    totalBorrowed: number;
+    isConnected: boolean;
+}
+
+export function StatsOverview({ netWorth, totalSupplied, totalBorrowed, isConnected }: StatsOverviewProps) {
     const { t } = useLanguage();
-
-    const { data: results } = useReadContracts({
-        contracts: [
-            // Wallet Balances
-            { address: USDC_ADDRESS, abi: ERC20_ABI, functionName: 'balanceOf', args: [address!] },
-            { address: EURC_ADDRESS, abi: ERC20_ABI, functionName: 'balanceOf', args: [address!] },
-            { address: USYC_ADDRESS, abi: ERC20_ABI, functionName: 'balanceOf', args: [address!] },
-
-            // Supplied Balances (Lending Pool)
-            { address: LENDING_POOL_ADDRESS, abi: LENDING_POOL_ABI, functionName: 'getUserBalance', args: [address!, USDC_ADDRESS] },
-            { address: LENDING_POOL_ADDRESS, abi: LENDING_POOL_ABI, functionName: 'getUserBalance', args: [address!, EURC_ADDRESS] },
-            { address: LENDING_POOL_ADDRESS, abi: LENDING_POOL_ABI, functionName: 'getUserBalance', args: [address!, USYC_ADDRESS] },
-
-            // Borrowed Balances (Lending Pool)
-            { address: LENDING_POOL_ADDRESS, abi: LENDING_POOL_ABI, functionName: 'getUserDebt', args: [address!, USDC_ADDRESS] },
-            { address: LENDING_POOL_ADDRESS, abi: LENDING_POOL_ABI, functionName: 'getUserDebt', args: [address!, EURC_ADDRESS] },
-            { address: LENDING_POOL_ADDRESS, abi: LENDING_POOL_ABI, functionName: 'getUserDebt', args: [address!, USYC_ADDRESS] },
-        ],
-        query: {
-            enabled: !!address,
-            refetchInterval: 5000
-        }
-    });
-
-    // Helper: Parse BigInt to Number (6 decimals)
-    const getVal = (index: number) => {
-        if (!results || !results[index] || results[index].status !== "success") return 0;
-        return Number(formatUnits(results[index].result as bigint, 6));
-    };
-
-    const walletUSDC = getVal(0);
-    const walletEURC = getVal(1);
-    const walletUSYC = getVal(2);
-
-    const suppliedUSDC = getVal(3);
-    const suppliedEURC = getVal(4);
-    const suppliedUSYC = getVal(5);
-
-    const borrowedUSDC = getVal(6);
-    const borrowedEURC = getVal(7);
-    const borrowedUSYC = getVal(8);
-
-    const totalWallet = walletUSDC + walletEURC + walletUSYC;
-    const totalSupplied = suppliedUSDC + suppliedEURC + suppliedUSYC;
-    const totalBorrowed = borrowedUSDC + borrowedEURC + borrowedUSYC;
-
-    const netWorth = totalWallet + totalSupplied - totalBorrowed;
 
     return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
