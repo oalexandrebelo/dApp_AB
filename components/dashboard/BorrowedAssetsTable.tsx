@@ -25,6 +25,9 @@ function BorrowedAssetRow({ asset, borrowedBalance, onRepay }: any) {
     const actualDebt = useActualDebt(asset.address, asset.decimals);
     const interestAccrued = calculateInterestAccrued(actualDebt, borrowedBalance);
 
+    // Show loading state
+    const isLoading = borrowAPY === '0.00%' && actualDebt === 0 && borrowedBalance > 0;
+
     return (
         <div className="grid grid-cols-[1.5fr_1.2fr_auto] gap-4 items-center p-4 hover:bg-white/5 transition">
             <div className="flex items-center gap-3">
@@ -38,12 +41,23 @@ function BorrowedAssetRow({ asset, borrowedBalance, onRepay }: any) {
             </div>
 
             <div className="text-right">
-                <div className="font-bold text-orange-400">{actualDebt.toFixed(2)}</div>
-                <div className="text-xs text-orange-500/70">{borrowAPY} APY</div>
-                {interestAccrued > 0.01 && (
-                    <div className="text-xs text-red-400 font-semibold">
-                        +${interestAccrued.toFixed(2)} interest
-                    </div>
+                {isLoading ? (
+                    <>
+                        <div className="h-5 w-20 bg-white/10 animate-pulse rounded ml-auto"></div>
+                        <div className="h-3 w-16 bg-white/10 animate-pulse rounded ml-auto mt-1"></div>
+                    </>
+                ) : (
+                    <>
+                        <div className="font-bold text-orange-400">
+                            {actualDebt > 0 ? actualDebt.toFixed(2) : borrowedBalance.toFixed(2)}
+                        </div>
+                        <div className="text-xs text-orange-500/70">{borrowAPY} APY</div>
+                        {interestAccrued > 0.001 && (
+                            <div className="text-xs text-red-400 font-semibold">
+                                +${interestAccrued.toFixed(4)} interest
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 
@@ -51,6 +65,7 @@ function BorrowedAssetRow({ asset, borrowedBalance, onRepay }: any) {
                 size="sm"
                 className="rounded-full bg-green-500 hover:bg-green-600 text-white min-w-[100px] h-7 text-xs"
                 onClick={() => onRepay(asset, borrowedBalance)}
+                disabled={isLoading}
             >
                 Repay
             </Button>

@@ -25,6 +25,9 @@ function SuppliedAssetRow({ asset, suppliedBalance, onWithdraw }: any) {
     const actualBalance = useActualBalance(asset.address, asset.decimals);
     const interestEarned = calculateInterestEarned(actualBalance, suppliedBalance);
 
+    // Show loading state
+    const isLoading = supplyAPY === '0.00%' && actualBalance === 0 && suppliedBalance > 0;
+
     return (
         <div className="grid grid-cols-[1.5fr_1.2fr_auto] gap-4 items-center p-4 hover:bg-white/5 transition">
             <div className="flex items-center gap-3">
@@ -38,12 +41,23 @@ function SuppliedAssetRow({ asset, suppliedBalance, onWithdraw }: any) {
             </div>
 
             <div className="text-right">
-                <div className="font-bold text-green-400">{actualBalance.toFixed(2)}</div>
-                <div className="text-xs text-green-500/70">{supplyAPY} APY</div>
-                {interestEarned > 0.01 && (
-                    <div className="text-xs text-green-400 font-semibold">
-                        +${interestEarned.toFixed(2)} earned
-                    </div>
+                {isLoading ? (
+                    <>
+                        <div className="h-5 w-20 bg-white/10 animate-pulse rounded ml-auto"></div>
+                        <div className="h-3 w-16 bg-white/10 animate-pulse rounded ml-auto mt-1"></div>
+                    </>
+                ) : (
+                    <>
+                        <div className="font-bold text-green-400">
+                            {actualBalance > 0 ? actualBalance.toFixed(2) : suppliedBalance.toFixed(2)}
+                        </div>
+                        <div className="text-xs text-green-500/70">{supplyAPY} APY</div>
+                        {interestEarned > 0.001 && (
+                            <div className="text-xs text-green-400 font-semibold">
+                                +${interestEarned.toFixed(4)} earned
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
 
@@ -51,6 +65,7 @@ function SuppliedAssetRow({ asset, suppliedBalance, onWithdraw }: any) {
                 size="sm"
                 className="rounded-full bg-orange-500 hover:bg-orange-600 text-white min-w-[100px] h-7 text-xs"
                 onClick={() => onWithdraw(asset, suppliedBalance)}
+                disabled={isLoading}
             >
                 Withdraw
             </Button>
