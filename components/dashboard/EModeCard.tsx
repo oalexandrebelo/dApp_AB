@@ -106,7 +106,7 @@ export function EModeCard({ currentCategory, onSuccess }: EModeCardProps) {
                                 <Alert className="border-blue-500/30 bg-blue-950/20">
                                     <Info className="h-4 w-4 text-blue-400" />
                                     <AlertTitle className="text-blue-400">What is E-Mode?</AlertTitle>
-                                    <AlertDescription className="text-sm">
+                                    <AlertDescription className="text-sm text-foreground">
                                         E-Mode allows higher LTV for correlated assets. Enable Stablecoins E-Mode to borrow
                                         up to 97% against USDC, EURC, and USYC collateral.
                                     </AlertDescription>
@@ -127,7 +127,7 @@ export function EModeCard({ currentCategory, onSuccess }: EModeCardProps) {
                                             {EMODE_CATEGORIES.map(cat => (
                                                 <SelectItem key={cat.id} value={cat.id.toString()}>
                                                     <div className="flex flex-col">
-                                                        <div className="font-bold">{cat.name}</div>
+                                                        <div className="font-bold text-foreground">{cat.name}</div>
                                                         <div className="text-xs text-muted-foreground">
                                                             {cat.ltv} LTV • {cat.description}
                                                         </div>

@@ -101,24 +101,40 @@ export function AssetTable({ mode }: { mode?: "supply" | "borrow" }) {
     return (
         <>
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <CardTitle>{t.dashboard.assets.title}</CardTitle>
-                    {!mode && (
-                        <div className="flex bg-secondary/50 p-1 rounded-lg">
-                            <button
-                                onClick={() => setActiveTab("supply")}
-                                className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", activeTab === "supply" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
-                            >
-                                {t.dashboard.sidebar.supply}
-                            </button>
-                            <button
-                                onClick={() => setActiveTab("borrow")}
-                                className={cn("px-4 py-1.5 rounded-md text-sm font-medium transition-all", activeTab === "borrow" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground hover:text-foreground")}
-                            >
-                                {t.dashboard.sidebar.borrow}
-                            </button>
-                        </div>
-                    )}
+                <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">{t.assetTable.title}</CardTitle>
+                        {!mode && (
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setActiveTab("supply")}
+                                    className={cn(
+                                        "transition-all",
+                                        activeTab === "supply"
+                                            ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                                            : "hover:bg-muted"
+                                    )}
+                                >
+                                    {t.assetTable.tabs.supply}
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setActiveTab("borrow")}
+                                    className={cn(
+                                        "transition-all",
+                                        activeTab === "borrow"
+                                            ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                                            : "hover:bg-muted"
+                                    )}
+                                >
+                                    {t.assetTable.tabs.borrow}
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </CardHeader>
                 <CardContent className="p-0">
                     <div className="divide-y divide-border">
