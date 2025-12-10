@@ -7,6 +7,8 @@ import "./IERC20.sol";
 import "./IPriceOracle.sol";
 import "./SimplePriceOracle.sol";
 import "./ChainlinkOracle.sol";
+import "./IFlashLoanReceiver.sol";
+
 
 /**
  * @title LendingPool
@@ -112,11 +114,31 @@ contract LendingPool {
         address liquidator,
         bool receiveAToken
     );
+    event FlashLoan(
+        address indexed target,
+        address indexed initiator,
+        address indexed asset,
+        uint256 amount,
+        uint256 premium
+    );
     
     // ============ Ownership ============
     
     address public owner;
     address public treasury;
+    
+    // ============ Reentrancy Guard ============
+    
+    uint256 private _status;
+    uint256 private constant _NOT_ENTERED = 1;
+    uint256 private constant _ENTERED = 2;
+    
+    modifier nonReentrant() {
+        require(_status != _ENTERED, "ReentrancyGuard: reentrant call");
+        _status = _ENTERED;
+        _;
+        _status = _NOT_ENTERED;
+    }
     
     modifier onlyOwner() {
         require(msg.sender == owner, "Only Owner");
@@ -126,7 +148,9 @@ contract LendingPool {
     constructor() {
         owner = msg.sender;
         treasury = msg.sender;
+        _status = _NOT_ENTERED;
     }
+
     
     // ============ Admin Functions ============
     
@@ -730,5 +754,69 @@ contract LendingPool {
         uint256 bonusAmount = (collateralAmount * liquidationBonus) / WAD;
         
         return collateralAmount + bonusAmount;
+    }
+    
+    // ============ Flash Loans ============
+    
+    /**
+     * @notice Execute a flash loan
+     * @dev Allows users to borrow any available amount of assets without collateral,
+     *      as long as the amount + premium is returned within the same transaction
+     * @param receiverAddress The address of the contract receiving the funds
+     * @param asset The address of the asset being flash-borrowed
+     * @param amount The amount of the asset being flash-borrowed
+     * @param params Variadic packed params to pass to the receiver as extra information
+     */
+    function flashLoan(
+        address receiverAddress,
+        address asset,
+        uint256 amount,
+        bytes calldata params
+    ) external nonReentrant {
+        require(assetConfigs[asset].isActive, "Asset not active");
+        require(amount > 0, "Amount must be greater than 0");
+        
+        // Calculate premium (0.09% = 9 basis points)
+        uint256 premium = (amount * 9) / 10000;
+        uint256 amountPlusPremium = amount + premium;
+        
+        // Get available liquidity
+        uint256 availableLiquidity = IERC20(asset).balanceOf(address(this));
+        require(amount <= availableLiquidity, "Insufficient liquidity");
+        
+        // Transfer flash-borrowed amount to receiver
+        require(
+            IERC20(asset).transfer(receiverAddress, amount),
+            "Transfer failed"
+        );
+        
+        // Execute operation on receiver
+        require(
+            IFlashLoanReceiver(receiverAddress).executeOperation(
+                asset,
+                amount,
+                premium,
+                msg.sender,
+                params
+            ),
+            "Flashloan execution failed"
+        );
+        
+        // Pull amount + premium from receiver
+        require(
+            IERC20(asset).transferFrom(receiverAddress, address(this), amountPlusPremium),
+            "Flashloan repayment failed"
+        );
+        
+        // Add premium to reserves
+        reserves[asset] += premium;
+        
+        emit FlashLoan(
+            receiverAddress,
+            msg.sender,
+            asset,
+            amount,
+            premium
+        );
     }
 }

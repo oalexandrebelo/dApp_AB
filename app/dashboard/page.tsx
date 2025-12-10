@@ -10,6 +10,7 @@ import { BorrowedAssetsTable } from "@/components/dashboard/BorrowedAssetsTable"
 import { SuppliedAssetsTable } from "@/components/dashboard/SuppliedAssetsTable";
 import { LiquidationAlert } from "@/components/dashboard/LiquidationAlert";
 import { EModeCard } from "@/components/dashboard/EModeCard";
+import { ProtocolStats } from "@/components/dashboard/ProtocolStats";
 import { useLanguage } from '@/lib/i18n';
 import { useNetAPY } from '@/lib/useNetAPY';
 import { useAccount, useReadContracts } from "wagmi";
@@ -117,6 +118,9 @@ export default function DashboardPage() {
             {isConnected && totalBorrowed > 0 && healthFactor < 1.2 && (
                 <LiquidationAlert healthFactor={healthFactor} />
             )}
+
+            {/* Protocol Stats - Global metrics */}
+            <ProtocolStats />
 
             {/* Key Metrics - Stats Overview */}
             <StatsOverview

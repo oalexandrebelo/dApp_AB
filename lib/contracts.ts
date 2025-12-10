@@ -218,4 +218,30 @@ export const CROSS_CHAIN_BRIDGE_ABI = [
         stateMutability: "nonpayable",
         type: "function",
     },
+    {
+        inputs: [{ name: "asset", type: "address" }],
+        name: "totalSupplied",
+        outputs: [{ name: "", type: "uint256" }],
+        stateMutability: "view",
+        type: "function",
+    },
+    {
+        inputs: [{ name: "asset", type: "address" }],
+        name: "totalBorrowed",
+        outputs: [{ name: "", type: "uint256" }],
+        stateMutability: "view",
+        type: "function",
+    },
+    {
+        inputs: [
+            { name: "receiverAddress", type: "address" },
+            { name: "asset", type: "address" },
+            { name: "amount", type: "uint256" },
+            { name: "params", type: "bytes" },
+        ],
+        name: "flashLoan",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+    },
 ] as const;
