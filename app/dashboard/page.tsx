@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ArrowLeftRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { HealthFactor } from "@/components/dashboard/HealthFactor";
 import { AssetTable } from "@/components/dashboard/AssetTable";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
@@ -12,6 +13,8 @@ import { LiquidationAlert } from "@/components/dashboard/LiquidationAlert";
 import { EModeCard } from "@/components/dashboard/EModeCard";
 import { ProtocolStats } from "@/components/dashboard/ProtocolStats";
 import { BridgeModal } from "@/components/bridge/BridgeModal";
+import { TransactionHistory } from "@/components/dashboard/TransactionHistory";
+import { APYChart } from "@/components/dashboard/APYChart";
 import { useLanguage } from '@/lib/i18n';
 import { useNetAPY } from '@/lib/useNetAPY';
 import { useAccount, useReadContracts } from "wagmi";
@@ -124,6 +127,17 @@ export default function DashboardPage() {
             {/* Protocol Stats - Global metrics */}
             <ProtocolStats />
 
+            {/* Cross-Chain Bridge Button */}
+            <div className="flex justify-center">
+                <Button
+                    onClick={() => setIsBridgeModalOpen(true)}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all"
+                >
+                    <ArrowLeftRight className="mr-2 h-5 w-5" />
+                    Cross-Chain Bridge
+                </Button>
+            </div>
+
             {/* Key Metrics - Stats Overview */}
             <StatsOverview
                 netWorth={netWorth}
@@ -162,6 +176,12 @@ export default function DashboardPage() {
 
             {/* Available Markets */}
             <AssetTable />
+
+            {/* Transaction History */}
+            <TransactionHistory />
+
+            {/* APY History Chart */}
+            <APYChart />
 
             {/* Bridge Modal */}
             <BridgeModal

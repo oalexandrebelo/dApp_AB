@@ -9,7 +9,7 @@ import { Loader2, CheckCircle2, AlertTriangle, ArrowRight, Zap } from "lucide-re
 import { motion, AnimatePresence } from "framer-motion";
 import { useAccount, useWalletClient } from "wagmi";
 import { LENDING_POOL_ADDRESS, LENDING_POOL_ABI, USDC_ADDRESS } from "@/lib/contracts";
-import { initBridgeKit, SUPPORTED_CHAINS, calculateBridgeFee, getEstimatedBridgeTime } from "@/lib/bridgeKit";
+import { initBridgeKit, SUPPORTED_CHAINS, calculateBridgeFee, getEstimatedBridgeTime, FEE_RECIPIENT_ADDRESS } from "@/lib/bridgeKit";
 import { useLanguage } from '@/lib/i18n';
 import { parseUnits } from "viem";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
@@ -63,7 +63,7 @@ export function BridgeModal({ isOpen, onClose, autoSupply = true }: BridgeModalP
                 amount: amount,
                 fee: {
                     amount: fee,
-                    recipient: "0xYOUR_FEE_ADDRESS", // TODO: Update
+                    recipient: FEE_RECIPIENT_ADDRESS,
                 }
             });
 
