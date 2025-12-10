@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "./IPriceOracle.sol";
+
 /**
  * @title SimplePriceOracle
  * @notice Simple price oracle for MVP - returns 1:1 pricing for stablecoins
  * @dev In production, replace with Chainlink or Pyth oracle
  */
-contract SimplePriceOracle {
+contract SimplePriceOracle is IPriceOracle {
     address public owner;
     
     // Asset address => Price in USD (8 decimals, e.g., 1e8 = $1.00)

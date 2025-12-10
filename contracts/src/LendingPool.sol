@@ -4,7 +4,9 @@ pragma solidity ^0.8.20;
 import "./BorrowingEngine.sol";
 import "./RiskManager.sol";
 import "./IERC20.sol";
+import "./IPriceOracle.sol";
 import "./SimplePriceOracle.sol";
+import "./ChainlinkOracle.sol";
 
 /**
  * @title LendingPool
@@ -26,7 +28,9 @@ contract LendingPool {
     
     BorrowingEngine public borrowingEngine;
     RiskManager public riskManager;
-    SimplePriceOracle public priceOracle;
+    
+    // Price oracle (can be SimplePriceOracle or ChainlinkOracle)
+    IPriceOracle public priceOracle;
     
     // User balances (principal only, not including interest)
     mapping(address => mapping(address => uint256)) private _userSuppliedPrincipal;
@@ -139,7 +143,7 @@ contract LendingPool {
     }
     
     function setPriceOracle(address _priceOracle) external onlyOwner {
-        priceOracle = SimplePriceOracle(_priceOracle);
+        priceOracle = IPriceOracle(_priceOracle);
     }
     
     /**
