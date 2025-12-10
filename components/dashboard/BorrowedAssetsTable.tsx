@@ -19,6 +19,45 @@ const ASSET_CONFIGS = [
     { id: "usyc", symbol: "USYC", name: "Yield Coin", address: "0xe9185F0c5F296Ed1797AaE4238D26CCaBEadb86C" as `0x${string}`, decimals: 6, variableApy: "6.0%" },
 ];
 
+// Separate component to properly use hooks
+function BorrowedAssetRow({ asset, borrowedBalance, onRepay }: any) {
+    const borrowAPY = useAssetAPY(asset.address, 'borrow');
+    const actualDebt = useActualDebt(asset.address, asset.decimals);
+    const interestAccrued = calculateInterestAccrued(actualDebt, borrowedBalance);
+
+    return (
+        <div className="grid grid-cols-[1.5fr_1.2fr_auto] gap-4 items-center p-4 hover:bg-white/5 transition">
+            <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-orange-500/20 flex items-center justify-center text-xs font-bold text-orange-400">
+                    {asset.symbol[0]}
+                </div>
+                <div>
+                    <div className="font-bold">{asset.symbol}</div>
+                    <div className="text-xs text-muted-foreground">{asset.name}</div>
+                </div>
+            </div>
+
+            <div className="text-right">
+                <div className="font-bold text-orange-400">{actualDebt.toFixed(2)}</div>
+                <div className="text-xs text-orange-500/70">{borrowAPY} APY</div>
+                {interestAccrued > 0.01 && (
+                    <div className="text-xs text-red-400 font-semibold">
+                        +${interestAccrued.toFixed(2)} interest
+                    </div>
+                )}
+            </div>
+
+            <Button
+                size="sm"
+                className="rounded-full bg-green-500 hover:bg-green-600 text-white min-w-[100px] h-7 text-xs"
+                onClick={() => onRepay(asset, borrowedBalance)}
+            >
+                Repay
+            </Button>
+        </div>
+    );
+}
+
 export function BorrowedAssetsTable({ borrowedUSDC, borrowedEURC, borrowedUSYC }: BorrowedAssetsTableProps) {
     const { t } = useLanguage();
     const [selectedAsset, setSelectedAsset] = useState<any>(null);
@@ -70,34 +109,13 @@ export function BorrowedAssetsTable({ borrowedUSDC, borrowedEURC, borrowedUSYC }
                     <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
                         {borrowedAssets.map((asset) => {
                             const borrowedBalance = borrowedAmounts[asset.id as keyof typeof borrowedAmounts];
-                            // eslint-disable-next-line react-hooks/rules-of-hooks
-                            const borrowAPY = useAssetAPY(asset.address, 'borrow');
-
                             return (
-                                <div key={asset.id} className="grid grid-cols-[1.5fr_1fr_auto] gap-4 items-center p-4 hover:bg-white/5 transition">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-8 w-8 rounded-full bg-orange-500/20 flex items-center justify-center text-xs font-bold text-orange-400">
-                                            {asset.symbol[0]}
-                                        </div>
-                                        <div>
-                                            <div className="font-bold">{asset.symbol}</div>
-                                            <div className="text-xs text-muted-foreground">{asset.name}</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="text-right">
-                                        <div className="font-bold text-orange-400">{borrowedBalance.toFixed(2)}</div>
-                                        <div className="text-xs text-muted-foreground">{borrowAPY} APY</div>
-                                    </div>
-
-                                    <Button
-                                        size="sm"
-                                        className="rounded-full bg-green-500 hover:bg-green-600 text-white min-w-[100px] h-7 text-xs"
-                                        onClick={() => openRepayModal(asset, borrowedBalance)}
-                                    >
-                                        Repay
-                                    </Button>
-                                </div>
+                                <BorrowedAssetRow
+                                    key={asset.id}
+                                    asset={asset}
+                                    borrowedBalance={borrowedBalance}
+                                    onRepay={openRepayModal}
+                                />
                             );
                         })}
                     </div>

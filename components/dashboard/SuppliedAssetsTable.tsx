@@ -19,6 +19,45 @@ const ASSET_CONFIGS = [
     { id: "usyc", symbol: "USYC", name: "Yield Coin", address: "0xe9185F0c5F296Ed1797AaE4238D26CCaBEadb86C" as `0x${string}`, decimals: 6, apy: "5.1%" },
 ];
 
+// Separate component to properly use hooks
+function SuppliedAssetRow({ asset, suppliedBalance, onWithdraw }: any) {
+    const supplyAPY = useAssetAPY(asset.address, 'supply');
+    const actualBalance = useActualBalance(asset.address, asset.decimals);
+    const interestEarned = calculateInterestEarned(actualBalance, suppliedBalance);
+
+    return (
+        <div className="grid grid-cols-[1.5fr_1.2fr_auto] gap-4 items-center p-4 hover:bg-white/5 transition">
+            <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-full bg-green-500/20 flex items-center justify-center text-xs font-bold text-green-400">
+                    {asset.symbol[0]}
+                </div>
+                <div>
+                    <div className="font-bold">{asset.symbol}</div>
+                    <div className="text-xs text-muted-foreground">{asset.name}</div>
+                </div>
+            </div>
+
+            <div className="text-right">
+                <div className="font-bold text-green-400">{actualBalance.toFixed(2)}</div>
+                <div className="text-xs text-green-500/70">{supplyAPY} APY</div>
+                {interestEarned > 0.01 && (
+                    <div className="text-xs text-green-400 font-semibold">
+                        +${interestEarned.toFixed(2)} earned
+                    </div>
+                )}
+            </div>
+
+            <Button
+                size="sm"
+                className="rounded-full bg-orange-500 hover:bg-orange-600 text-white min-w-[100px] h-7 text-xs"
+                onClick={() => onWithdraw(asset, suppliedBalance)}
+            >
+                Withdraw
+            </Button>
+        </div>
+    );
+}
+
 export function SuppliedAssetsTable({ suppliedUSDC, suppliedEURC, suppliedUSYC }: SuppliedAssetsTableProps) {
     const { t } = useLanguage();
     const [selectedAsset, setSelectedAsset] = useState<any>(null);
@@ -70,34 +109,13 @@ export function SuppliedAssetsTable({ suppliedUSDC, suppliedEURC, suppliedUSYC }
                     <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
                         {suppliedAssets.map((asset) => {
                             const suppliedBalance = suppliedAmounts[asset.id as keyof typeof suppliedAmounts];
-                            // eslint-disable-next-line react-hooks/rules-of-hooks
-                            const supplyAPY = useAssetAPY(asset.address, 'supply');
-
                             return (
-                                <div key={asset.id} className="grid grid-cols-[1.5fr_1fr_auto] gap-4 items-center p-4 hover:bg-white/5 transition">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-8 w-8 rounded-full bg-green-500/20 flex items-center justify-center text-xs font-bold text-green-400">
-                                            {asset.symbol[0]}
-                                        </div>
-                                        <div>
-                                            <div className="font-bold">{asset.symbol}</div>
-                                            <div className="text-xs text-muted-foreground">{asset.name}</div>
-                                        </div>
-                                    </div>
-
-                                    <div className="text-right">
-                                        <div className="font-bold text-green-400">{suppliedBalance.toFixed(2)}</div>
-                                        <div className="text-xs text-muted-foreground">{supplyAPY} APY</div>
-                                    </div>
-
-                                    <Button
-                                        size="sm"
-                                        className="rounded-full bg-orange-500 hover:bg-orange-600 text-white min-w-[100px] h-7 text-xs"
-                                        onClick={() => openWithdrawModal(asset, suppliedBalance)}
-                                    >
-                                        Withdraw
-                                    </Button>
-                                </div>
+                                <SuppliedAssetRow
+                                    key={asset.id}
+                                    asset={asset}
+                                    suppliedBalance={suppliedBalance}
+                                    onWithdraw={openWithdrawModal}
+                                />
                             );
                         })}
                     </div>
