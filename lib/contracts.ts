@@ -181,6 +181,19 @@ export const LENDING_POOL_ABI = [
         stateMutability: "view",
         type: "function",
     },
+    {
+        inputs: [
+            { name: "collateralAsset", type: "address" },
+            { name: "debtAsset", type: "address" },
+            { name: "user", type: "address" },
+            { name: "debtToCover", type: "uint256" },
+            { name: "receiveAToken", type: "bool" }
+        ],
+        name: "liquidate",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+    },
 ] as const;
 
 export const CROSS_CHAIN_BRIDGE_ABI = [
