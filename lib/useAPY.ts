@@ -52,3 +52,23 @@ export function useUtilizationRate(assetAddress: `0x${string}`) {
     const rate = (Number(utilization) / 1e18) * 100;
     return rate.toFixed(2) + '%';
 }
+
+/**
+ * Calculate interest earned on supplied assets
+ * @param currentBalance Current balance with interest (from getUserBalance)
+ * @param suppliedAmount Original supplied amount (from dashboard calculation)
+ * @returns Interest earned as a number
+ */
+export function calculateInterestEarned(currentBalance: number, suppliedAmount: number): number {
+    return Math.max(0, currentBalance - suppliedAmount);
+}
+
+/**
+ * Calculate interest accrued on borrowed assets
+ * @param currentDebt Current debt with interest (from getUserDebt)
+ * @param borrowedAmount Original borrowed amount (from dashboard calculation)
+ * @returns Interest accrued as a number
+ */
+export function calculateInterestAccrued(currentDebt: number, borrowedAmount: number): number {
+    return Math.max(0, currentDebt - borrowedAmount);
+}
