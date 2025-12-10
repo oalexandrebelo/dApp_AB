@@ -13,6 +13,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { TrendingUp, Info, Zap, Settings2 } from "lucide-react";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { LENDING_POOL_ADDRESS, LENDING_POOL_ABI } from "@/lib/contracts";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 interface EModeCardProps {
@@ -95,62 +96,81 @@ export function EModeCard({ currentCategory, onSuccess }: EModeCardProps) {
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-[500px]">
                             <DialogHeader>
-                                <DialogTitle>Efficiency Mode (E-Mode)</DialogTitle>
-                                <DialogDescription>
+                                <DialogTitle className="text-xl">Efficiency Mode (E-Mode)</DialogTitle>
+                                <DialogDescription className="text-base">
                                     Maximize capital efficiency for correlated assets
                                 </DialogDescription>
                             </DialogHeader>
 
-                            <div className="space-y-4 py-4">
+                            <div className="space-y-6 py-4">
                                 {/* Info Alert */}
-                                <Alert className="border-blue-500/30 bg-blue-950/20">
+                                <Alert className="border-blue-500/50 bg-blue-500/10">
                                     <Info className="h-4 w-4 text-blue-400" />
-                                    <AlertTitle className="text-blue-400">What is E-Mode?</AlertTitle>
-                                    <AlertDescription className="text-sm text-foreground">
+                                    <AlertTitle className="text-blue-300 font-semibold">What is E-Mode?</AlertTitle>
+                                    <AlertDescription className="text-sm text-foreground/90 leading-relaxed">
                                         E-Mode allows higher LTV for correlated assets. Enable Stablecoins E-Mode to borrow
                                         up to 97% against USDC, EURC, and USYC collateral.
                                     </AlertDescription>
                                 </Alert>
 
-                                {/* Category Selector */}
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Select Mode</label>
-                                    <Select
-                                        value={selectedCategory}
-                                        onValueChange={handleCategoryChange}
-                                        disabled={isPending || isConfirming}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select E-Mode category" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {EMODE_CATEGORIES.map(cat => (
-                                                <SelectItem key={cat.id} value={cat.id.toString()}>
-                                                    <div className="flex flex-col">
-                                                        <div className="font-bold text-foreground">{cat.name}</div>
-                                                        <div className="text-xs text-muted-foreground">
-                                                            {cat.ltv} LTV • {cat.description}
+                                {/* Category Selector - Radio Buttons */}
+                                <div className="space-y-3">
+                                    <label className="text-sm font-semibold text-foreground">Select Mode</label>
+                                    <div className="space-y-3">
+                                        {EMODE_CATEGORIES.map(cat => (
+                                            <button
+                                                key={cat.id}
+                                                onClick={() => handleCategoryChange(cat.id.toString())}
+                                                disabled={isPending || isConfirming}
+                                                className={cn(
+                                                    "w-full p-4 rounded-lg border-2 transition-all text-left",
+                                                    selectedCategory === cat.id.toString()
+                                                        ? "border-primary bg-primary/10"
+                                                        : "border-border hover:border-primary/50 hover:bg-muted/50",
+                                                    (isPending || isConfirming) && "opacity-50 cursor-not-allowed"
+                                                )}
+                                            >
+                                                <div className="flex items-start gap-3">
+                                                    <div className={cn(
+                                                        "h-5 w-5 rounded-full border-2 flex items-center justify-center mt-0.5",
+                                                        selectedCategory === cat.id.toString()
+                                                            ? "border-primary bg-primary"
+                                                            : "border-muted-foreground"
+                                                    )}>
+                                                        {selectedCategory === cat.id.toString() && (
+                                                            <div className="h-2 w-2 rounded-full bg-primary-foreground" />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <div className="font-bold text-foreground text-base">{cat.name}</div>
+                                                        <div className="text-sm text-muted-foreground mt-1">
+                                                            {cat.ltv} LTV • {cat.liqThreshold} Liquidation Threshold
+                                                        </div>
+                                                        <div className="text-xs text-muted-foreground mt-1">
+                                                            {cat.description}
                                                         </div>
                                                     </div>
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
 
                                 {/* Transaction Status */}
                                 {isPending && (
-                                    <div className="text-sm text-muted-foreground">
+                                    <div className="text-sm text-yellow-500 flex items-center gap-2">
+                                        <div className="h-4 w-4 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
                                         Waiting for wallet approval...
                                     </div>
                                 )}
                                 {isConfirming && (
-                                    <div className="text-sm text-muted-foreground">
+                                    <div className="text-sm text-blue-500 flex items-center gap-2">
+                                        <div className="h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                                         Confirming transaction...
                                     </div>
                                 )}
                                 {isSuccess && (
-                                    <div className="text-sm text-green-500">
+                                    <div className="text-sm text-green-500 font-medium">
                                         ✅ E-Mode updated successfully!
                                     </div>
                                 )}
