@@ -45,47 +45,69 @@ contract DeployLendingPoolV3 is Script {
         lendingPool.setPriceOracle(address(priceOracle));
         console.log("Price oracle set");
         
-        // 5. Add assets with liquidation parameters
+        // 5. Configure E-Mode Category 1: Stablecoins
+        lendingPool.setEModeCategory(
+            1,      // categoryId
+            9700,   // 97% LTV
+            9800,   // 98% liquidation threshold
+            101,    // 1% liquidation bonus
+            "Stablecoins"
+        );
+        console.log("E-Mode Category 1 (Stablecoins) configured: 97% LTV");
+        
+        // 6. Add assets with liquidation parameters
         // USDC
         lendingPool.addAsset(
             USDC,
-            0.75e18,  // 75% collateral factor (LTV)
-            0.80e18,  // 80% liquidation threshold
-            0.05e18,  // 5% liquidation bonus
-            0.10e18   // 10% reserve factor
+            0.75e18,    // 75% collateral factor (LTV)
+            0.80e18,    // 80% liquidation threshold
+            0.05e18,    // 5% liquidation bonus
+            0.10e18,    // 10% reserve factor
+            1000000e6,  // 1M USDC supply cap
+            500000e6,   // 500K USDC borrow cap
+            1           // E-Mode category 1 (Stablecoins)
         );
-        console.log("USDC added");
+        console.log("USDC added with caps and E-Mode");
         
         // EURC
         lendingPool.addAsset(
             EURC,
-            0.75e18,  // 75% collateral factor
-            0.80e18,  // 80% liquidation threshold
-            0.05e18,  // 5% liquidation bonus
-            0.10e18   // 10% reserve factor
+            0.75e18,    // 75% collateral factor
+            0.80e18,    // 80% liquidation threshold
+            0.05e18,    // 5% liquidation bonus
+            0.10e18,    // 10% reserve factor
+            1000000e6,  // 1M EURC supply cap
+            500000e6,   // 500K EURC borrow cap
+            1           // E-Mode category 1 (Stablecoins)
         );
-        console.log("EURC added");
+        console.log("EURC added with caps and E-Mode");
         
         // USYC (higher risk, lower LTV)
         lendingPool.addAsset(
             USYC,
-            0.70e18,  // 70% collateral factor
-            0.75e18,  // 75% liquidation threshold
-            0.07e18,  // 7% liquidation bonus (higher risk)
-            0.15e18   // 15% reserve factor
+            0.70e18,    // 70% collateral factor
+            0.75e18,    // 75% liquidation threshold
+            0.07e18,    // 7% liquidation bonus (higher risk)
+            0.15e18,    // 15% reserve factor
+            500000e6,   // 500K USYC supply cap (lower)
+            250000e6,   // 250K USYC borrow cap (lower)
+            1           // E-Mode category 1 (Stablecoins)
         );
-        console.log("USYC added");
+        console.log("USYC added with caps and E-Mode");
         
         vm.stopBroadcast();
         
         // Print summary
         console.log("\n=== Deployment Summary ===");
         console.log("SimplePriceOracle:", address(priceOracle));
-        console.log("LendingPool V3:", address(lendingPool));
+        console.log("LendingPool V4:", address(lendingPool));
+        console.log("\nE-Mode Categories:");
+        console.log("- Category 1 (Stablecoins): 97% LTV, 98% Liq Threshold, 1% Bonus");
         console.log("\nAssets configured:");
-        console.log("- USDC: 75% LTV, 80% Liq Threshold, 5% Bonus");
-        console.log("- EURC: 75% LTV, 80% Liq Threshold, 5% Bonus");
-        console.log("- USYC: 70% LTV, 75% Liq Threshold, 7% Bonus");
-        console.log("\nAll assets priced at $1.00");
+        console.log("- USDC: 75% LTV, 80% Liq Threshold, 5% Bonus, 1M supply cap, 500K borrow cap");
+        console.log("- EURC: 75% LTV, 80% Liq Threshold, 5% Bonus, 1M supply cap, 500K borrow cap");
+        console.log("- USYC: 70% LTV, 75% Liq Threshold, 7% Bonus, 500K supply cap, 250K borrow cap");
+        console.log("\nAll assets in E-Mode Category 1");
+        console.log("All assets priced at $1.00");
     }
 }

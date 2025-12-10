@@ -579,8 +579,18 @@ contract LendingPool {
                 uint256 collateralUSD = (suppliedBalance * assetPrice) / (10 ** assetDecimals);
                 totalCollateralUSD += collateralUSD;
                 
-                // Weighted by liquidation threshold
-                uint256 liqThreshold = assetConfigs[asset].liquidationThreshold;
+                // Check if user is in E-Mode and asset belongs to same category
+                uint8 userCategory = userEModeCategory[user];
+                uint256 liqThreshold;
+                
+                if (userCategory > 0 && assetConfigs[asset].eModeCategory == userCategory) {
+                    // Use E-Mode parameters (higher LTV)
+                    liqThreshold = uint256(eModeCategories[userCategory].liquidationThreshold) * 1e14; // Convert from basis points to WAD
+                } else {
+                    // Use default asset parameters
+                    liqThreshold = assetConfigs[asset].liquidationThreshold;
+                }
+                
                 totalCollateralWeighted += (collateralUSD * liqThreshold) / WAD;
                 totalLiquidationThresholdWeighted += collateralUSD;
             }
