@@ -9,10 +9,11 @@ interface StatsOverviewProps {
     netWorth: number;
     totalSupplied: number;
     totalBorrowed: number;
+    netAPY: string;
     isConnected: boolean;
 }
 
-export function StatsOverview({ netWorth, totalSupplied, totalBorrowed, isConnected }: StatsOverviewProps) {
+export function StatsOverview({ netWorth, totalSupplied, totalBorrowed, netAPY, isConnected }: StatsOverviewProps) {
     const { t } = useLanguage();
 
     return (
@@ -31,17 +32,17 @@ export function StatsOverview({ netWorth, totalSupplied, totalBorrowed, isConnec
                 </CardContent>
             </Card>
 
-            {/* Net APY (Estimated) */}
-            <Card>
+            {/* Net APY (Calculated) */}
+            <Card className="bg-gradient-to-br from-purple-900/20 to-purple-900/10 border-purple-500/20">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">{t.dashboard.stats.net_apy}</CardTitle>
-                    <ArrowUpRight className="h-4 w-4 text-green-400" />
+                    <CardTitle className="text-sm font-medium">Net APY</CardTitle>
+                    <ArrowUpRight className="h-4 w-4 text-purple-400" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">
-                        {totalSupplied > 0 ? "4.8%" : "0.0%"}
+                    <div className={`text-2xl font-bold ${netAPY.startsWith('+') ? 'text-green-400' : netAPY.startsWith('-') ? 'text-red-400' : ''}`}>
+                        {isConnected ? netAPY : '0.00%'}
                     </div>
-                    <p className="text-xs text-muted-foreground">{t.dashboard.stats.weighted_avg}</p>
+                    <p className="text-xs text-muted-foreground">Earnings - Costs</p>
                 </CardContent>
             </Card>
 
