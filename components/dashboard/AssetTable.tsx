@@ -18,8 +18,14 @@ const ASSET_CONFIGS = [
     { id: "usyc", symbol: "USYC", name: "Yield Coin", address: USYC_ADDRESS, decimals: 6, apy: "5.1%", variableApy: "6.0%", liquidity: "1M" },
 ] as const;
 
+import { useAssetAPY } from '@/lib/useAPY';
+
 function AssetRow({ asset, activeTab, openModal, t }: any) {
     const { address, isConnected } = useAccount();
+
+    // Fetch dynamic APY from contract
+    const supplyAPY = useAssetAPY(asset.address, 'supply');
+    const borrowAPY = useAssetAPY(asset.address, 'borrow');
 
     const { data: balanceData } = useReadContract({
         address: asset.address,
@@ -51,7 +57,7 @@ function AssetRow({ asset, activeTab, openModal, t }: any) {
 
             <div className="text-right">
                 <div className={cn("font-bold", activeTab === "supply" ? "text-green-400" : "text-orange-400")}>
-                    {activeTab === "supply" ? asset.apy : asset.variableApy}
+                    {activeTab === "supply" ? supplyAPY : borrowAPY}
                 </div>
                 <div className="text-xs text-muted-foreground">{activeTab === "supply" ? t.dashboard.asset_table.apy : "Variable APY"}</div>
             </div>

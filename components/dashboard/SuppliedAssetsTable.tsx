@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { WithdrawModal } from "@/components/flows/WithdrawModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from '@/lib/i18n';
+import { useAssetAPY } from '@/lib/useAPY';
 
 interface SuppliedAssetsTableProps {
     suppliedUSDC: number;
@@ -69,6 +70,9 @@ export function SuppliedAssetsTable({ suppliedUSDC, suppliedEURC, suppliedUSYC }
                     <div className="divide-y divide-border">
                         {suppliedAssets.map((asset) => {
                             const suppliedBalance = suppliedAmounts[asset.id as keyof typeof suppliedAmounts];
+                            // eslint-disable-next-line react-hooks/rules-of-hooks
+                            const supplyAPY = useAssetAPY(asset.address, 'supply');
+
                             return (
                                 <div key={asset.id} className="grid grid-cols-[1.5fr_1fr_auto] gap-4 items-center p-4 hover:bg-white/5 transition">
                                     <div className="flex items-center gap-3">
@@ -83,7 +87,7 @@ export function SuppliedAssetsTable({ suppliedUSDC, suppliedEURC, suppliedUSYC }
 
                                     <div className="text-right">
                                         <div className="font-bold text-green-400">{suppliedBalance.toFixed(2)}</div>
-                                        <div className="text-xs text-muted-foreground">{asset.apy} APY</div>
+                                        <div className="text-xs text-muted-foreground">{supplyAPY} APY</div>
                                     </div>
 
                                     <Button

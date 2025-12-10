@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RepayModal } from "@/components/flows/RepayModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from '@/lib/i18n';
+import { useAssetAPY } from '@/lib/useAPY';
 
 interface BorrowedAssetsTableProps {
     borrowedUSDC: number;
@@ -69,6 +70,9 @@ export function BorrowedAssetsTable({ borrowedUSDC, borrowedEURC, borrowedUSYC }
                     <div className="divide-y divide-border">
                         {borrowedAssets.map((asset) => {
                             const borrowedBalance = borrowedAmounts[asset.id as keyof typeof borrowedAmounts];
+                            // eslint-disable-next-line react-hooks/rules-of-hooks
+                            const borrowAPY = useAssetAPY(asset.address, 'borrow');
+
                             return (
                                 <div key={asset.id} className="grid grid-cols-[1.5fr_1fr_auto] gap-4 items-center p-4 hover:bg-white/5 transition">
                                     <div className="flex items-center gap-3">
@@ -83,7 +87,7 @@ export function BorrowedAssetsTable({ borrowedUSDC, borrowedEURC, borrowedUSYC }
 
                                     <div className="text-right">
                                         <div className="font-bold text-orange-400">{borrowedBalance.toFixed(2)}</div>
-                                        <div className="text-xs text-muted-foreground">{asset.variableApy} APY</div>
+                                        <div className="text-xs text-muted-foreground">{borrowAPY} APY</div>
                                     </div>
 
                                     <Button
