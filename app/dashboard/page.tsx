@@ -1,14 +1,14 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowUpRight, ArrowDownLeft, Wallet } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { HealthFactor } from "@/components/dashboard/HealthFactor";
 import { AssetTable } from "@/components/dashboard/AssetTable";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { BorrowedAssetsTable } from "@/components/dashboard/BorrowedAssetsTable";
 import { SuppliedAssetsTable } from "@/components/dashboard/SuppliedAssetsTable";
 import { LiquidationAlert } from "@/components/dashboard/LiquidationAlert";
-import { EModeSelector } from "@/components/dashboard/EModeSelector";
+import { EModeCard } from "@/components/dashboard/EModeCard";
 import { useLanguage } from '@/lib/i18n';
 import { useNetAPY } from '@/lib/useNetAPY';
 import { useAccount, useReadContracts } from "wagmi";
@@ -41,7 +41,7 @@ export default function DashboardPage() {
         ],
         query: {
             enabled: !!address,
-            refetchInterval: 10000 // Less aggressive automatic refresh
+            refetchInterval: 10000
         }
     });
 
@@ -62,7 +62,6 @@ export default function DashboardPage() {
     const borrowedEURC = getVal(7);
     const borrowedUSYC = getVal(8);
 
-    // E-Mode Category
     const userEModeCategory = results?.[9]?.status === "success" ? Number(results[9].result) : 0;
 
     const totalWallet = walletUSDC + walletEURC + walletUSYC;
@@ -71,18 +70,13 @@ export default function DashboardPage() {
 
     const netWorth = totalWallet + totalSupplied - totalBorrowed;
 
-    // Calculate Health Factor
-    // HF = (Collateral * LTV) / Debt
-    // Assumption: LTV = 80% (0.8) for all assets in this MVP
     const LIQUIDATION_THRESHOLD = 0.8;
-    let healthFactor = 999; // Infinite by default (no debt)
+    let healthFactor = 999;
     if (totalBorrowed > 0) {
         const calculatedHF = (totalSupplied * LIQUIDATION_THRESHOLD) / totalBorrowed;
-        // Cap at 999 to avoid showing absurdly high values like 50000
         healthFactor = Math.min(calculatedHF, 999);
     }
 
-    // Calculate Net APY
     const netAPY = useNetAPY(
         suppliedUSDC,
         suppliedEURC,
@@ -97,28 +91,29 @@ export default function DashboardPage() {
     };
 
     return (
-        <div className="space-y-8">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-6">
+            {/* Header */}
+            <div className="flex items-center justify-between">
                 <div>
-                    <div className="flex items-center gap-3">
-                        <h2 className="text-3xl font-bold tracking-tight">{t.dashboard.header.title}</h2>
-                        <button
-                            onClick={handleRefresh}
-                            disabled={isRefetching}
-                            className={`p-2 rounded-full hover:bg-muted transition-colors ${isRefetching ? 'animate-spin opacity-50' : ''}`}
-                            title="Refresh Data"
-                        >
-                            <ArrowUpRight className={`h-5 w-5 ${isRefetching ? '' : 'rotate-45'}`} />
-                        </button>
-                    </div>
-                    <p className="text-muted-foreground">{t.dashboard.header.subtitle}</p>
+                    <h2 className="text-2xl font-bold tracking-tight">{t.dashboard.header.title}</h2>
+                    <p className="text-sm text-muted-foreground">{t.dashboard.header.subtitle}</p>
                 </div>
-                <div className="w-full md:w-80 health-factor">
-                    <HealthFactor value={healthFactor} />
-                </div>
+                <button
+                    onClick={handleRefresh}
+                    disabled={isRefetching}
+                    className={`p-2 rounded-full hover:bg-muted transition-colors ${isRefetching ? 'animate-spin opacity-50' : ''}`}
+                    title="Refresh Data"
+                >
+                    <ArrowUpRight className={`h-5 w-5 ${isRefetching ? '' : 'rotate-45'}`} />
+                </button>
             </div>
 
-            {/* Stats Overview passing calculated data to avoid double fetch */}
+            {/* Liquidation Alert - Dismissible, top of page */}
+            {isConnected && totalBorrowed > 0 && healthFactor < 1.2 && (
+                <LiquidationAlert healthFactor={healthFactor} />
+            )}
+
+            {/* Key Metrics - Stats Overview */}
             <StatsOverview
                 netWorth={netWorth}
                 totalSupplied={totalSupplied}
@@ -127,39 +122,35 @@ export default function DashboardPage() {
                 isConnected={isConnected}
             />
 
-            {/* Liquidation Alert - Show warnings based on health factor */}
-            {isConnected && totalBorrowed > 0 && (
-                <LiquidationAlert healthFactor={healthFactor} />
-            )}
-
-            {/* E-Mode Selector - Let users access 97% LTV */}
+            {/* Health Factor + E-Mode - 2 column grid */}
             {isConnected && (
-                <EModeSelector
-                    currentCategory={userEModeCategory}
-                    onSuccess={refetch}
-                />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="w-full">
+                        <HealthFactor value={healthFactor} />
+                    </div>
+                    <EModeCard
+                        currentCategory={userEModeCategory}
+                        onSuccess={refetch}
+                    />
+                </div>
             )}
 
-            <div className="grid gap-4 md:grid-cols-2">
-                <div className="col-span-1">
-                    <SuppliedAssetsTable
-                        suppliedUSDC={suppliedUSDC}
-                        suppliedEURC={suppliedEURC}
-                        suppliedUSYC={suppliedUSYC}
-                    />
-                </div>
-                <div className="col-span-1">
-                    <BorrowedAssetsTable
-                        borrowedUSDC={borrowedUSDC}
-                        borrowedEURC={borrowedEURC}
-                        borrowedUSYC={borrowedUSYC}
-                    />
-                </div>
+            {/* Supply/Borrow Tables - 2 column grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <SuppliedAssetsTable
+                    suppliedUSDC={suppliedUSDC}
+                    suppliedEURC={suppliedEURC}
+                    suppliedUSYC={suppliedUSYC}
+                />
+                <BorrowedAssetsTable
+                    borrowedUSDC={borrowedUSDC}
+                    borrowedEURC={borrowedEURC}
+                    borrowedUSYC={borrowedUSYC}
+                />
             </div>
 
-            <div className="mt-4">
-                <AssetTable />
-            </div>
+            {/* Available Markets */}
+            <AssetTable />
         </div>
     );
 }
