@@ -94,7 +94,7 @@ export function EModeCard({ currentCategory, onSuccess }: EModeCardProps) {
                                 Change
                             </Button>
                         </DialogTrigger>
-                        <DialogContent className="sm:max-w-[500px] bg-card">
+                        <DialogContent className="sm:max-w-[500px] bg-card bg-gradient-to-b from-card to-card/95 backdrop-blur-xl">
                             <DialogHeader>
                                 <DialogTitle className="text-xl">Efficiency Mode (E-Mode)</DialogTitle>
                                 <DialogDescription className="text-base">
