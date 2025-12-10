@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { RepayModal } from "@/components/flows/RepayModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from '@/lib/i18n';
-import { useAssetAPY } from '@/lib/useAPY';
+import { useAssetAPY, useActualDebt, calculateInterestAccrued } from '@/lib/useAPY';
 
 interface BorrowedAssetsTableProps {
     borrowedUSDC: number;

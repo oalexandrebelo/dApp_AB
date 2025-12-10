@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { WithdrawModal } from "@/components/flows/WithdrawModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from '@/lib/i18n';
-import { useAssetAPY } from '@/lib/useAPY';
+import { useAssetAPY, useActualBalance, calculateInterestEarned } from '@/lib/useAPY';
 
 interface SuppliedAssetsTableProps {
     suppliedUSDC: number;
