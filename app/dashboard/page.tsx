@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowUpRight } from "lucide-react";
 import { HealthFactor } from "@/components/dashboard/HealthFactor";
@@ -11,6 +11,7 @@ import { SuppliedAssetsTable } from "@/components/dashboard/SuppliedAssetsTable"
 import { LiquidationAlert } from "@/components/dashboard/LiquidationAlert";
 import { EModeCard } from "@/components/dashboard/EModeCard";
 import { ProtocolStats } from "@/components/dashboard/ProtocolStats";
+import { BridgeModal } from "@/components/bridge/BridgeModal";
 import { useLanguage } from '@/lib/i18n';
 import { useNetAPY } from '@/lib/useNetAPY';
 import { useAccount, useReadContracts } from "wagmi";
@@ -20,6 +21,7 @@ import { USDC_ADDRESS, EURC_ADDRESS, USYC_ADDRESS, LENDING_POOL_ADDRESS, LENDING
 export default function DashboardPage() {
     const { t } = useLanguage();
     const { address, isConnected } = useAccount();
+    const [isBridgeModalOpen, setIsBridgeModalOpen] = useState(false);
 
     const { data: results, refetch, isRefetching } = useReadContracts({
         contracts: [
@@ -160,6 +162,13 @@ export default function DashboardPage() {
 
             {/* Available Markets */}
             <AssetTable />
+
+            {/* Bridge Modal */}
+            <BridgeModal
+                isOpen={isBridgeModalOpen}
+                onClose={() => setIsBridgeModalOpen(false)}
+                autoSupply={true}
+            />
         </div>
     );
 }
