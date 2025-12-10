@@ -66,9 +66,11 @@ export default function DashboardPage() {
     // HF = (Collateral * LTV) / Debt
     // Assumption: LTV = 80% (0.8) for all assets in this MVP
     const LIQUIDATION_THRESHOLD = 0.8;
-    let healthFactor = 999; // Infinite by default
+    let healthFactor = 999; // Infinite by default (no debt)
     if (totalBorrowed > 0) {
-        healthFactor = (totalSupplied * LIQUIDATION_THRESHOLD) / totalBorrowed;
+        const calculatedHF = (totalSupplied * LIQUIDATION_THRESHOLD) / totalBorrowed;
+        // Cap at 999 to avoid showing absurdly high values like 50000
+        healthFactor = Math.min(calculatedHF, 999);
     }
 
     const handleRefresh = () => {
