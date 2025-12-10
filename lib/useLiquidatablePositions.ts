@@ -3,7 +3,7 @@ import { usePublicClient, useBlockNumber } from "wagmi";
 import { LENDING_POOL_ADDRESS, LENDING_POOL_ABI } from "@/lib/contracts";
 
 interface Position {
-    user: string;
+    user: `0x${string}`;
     healthFactor: number;
     collateralUSD: number;
     debtUSD: number;
@@ -49,7 +49,7 @@ export function useLiquidatablePositions() {
                             { name: 'amount', type: 'uint256', indexed: false },
                         ],
                     },
-                    fromBlock: blockNumber ? blockNumber - 10000n : 'earliest',
+                    fromBlock: blockNumber ? blockNumber - BigInt(10000) : 'earliest',
                     toBlock: 'latest',
                 });
 

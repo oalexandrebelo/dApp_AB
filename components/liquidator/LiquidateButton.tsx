@@ -33,8 +33,8 @@ interface LiquidateButtonProps {
 export function LiquidateButton({ position }: LiquidateButtonProps) {
     const [open, setOpen] = useState(false);
     const [debtAmount, setDebtAmount] = useState(position.maxLiquidatable.toString());
-    const [selectedDebtAsset, setSelectedDebtAsset] = useState(USDC_ADDRESS);
-    const [selectedCollateralAsset, setSelectedCollateralAsset] = useState(USDC_ADDRESS);
+    const [selectedDebtAsset, setSelectedDebtAsset] = useState<`0x${string}`>(USDC_ADDRESS);
+    const [selectedCollateralAsset, setSelectedCollateralAsset] = useState<`0x${string}`>(USDC_ADDRESS);
 
     const { data: hash, writeContract, isPending } = useWriteContract();
 
@@ -52,7 +52,7 @@ export function LiquidateButton({ position }: LiquidateButtonProps) {
             args: [
                 selectedCollateralAsset,
                 selectedDebtAsset,
-                position.user,
+                position.user as `0x${string}`,
                 amount,
                 false // receiveAToken
             ],
