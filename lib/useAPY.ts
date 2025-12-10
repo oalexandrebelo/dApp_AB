@@ -10,7 +10,7 @@ import { LENDING_POOL_ADDRESS, LENDING_POOL_ABI } from './contracts';
 export function useAssetAPY(assetAddress: `0x${string}`, type: 'supply' | 'borrow') {
     const functionName = type === 'supply' ? 'getSupplyRate' : 'getBorrowRate';
 
-    const { data: rate, isLoading } = useReadContract({
+    const { data: rate, isLoading, isError } = useReadContract({
         address: LENDING_POOL_ADDRESS,
         abi: LENDING_POOL_ABI,
         functionName,
@@ -20,8 +20,9 @@ export function useAssetAPY(assetAddress: `0x${string}`, type: 'supply' | 'borro
         }
     });
 
-    if (isLoading || !rate) {
-        return '...';
+    // Show 0.00% if loading, error, or no data
+    if (isLoading || isError || !rate) {
+        return '0.00%';
     }
 
     // Convert from WAD (1e18 = 100%) to percentage
