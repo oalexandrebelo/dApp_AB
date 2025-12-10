@@ -103,7 +103,7 @@ export function AssetTable({ mode }: { mode?: "supply" | "borrow" }) {
             <Card>
                 <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                        <CardTitle className="text-lg">{t.assetTable.title}</CardTitle>
+                        <CardTitle className="text-lg">{t.dashboard.assets.title}</CardTitle>
                         {!mode && (
                             <div className="flex gap-2">
                                 <Button
@@ -117,7 +117,7 @@ export function AssetTable({ mode }: { mode?: "supply" | "borrow" }) {
                                             : "hover:bg-muted"
                                     )}
                                 >
-                                    {t.assetTable.tabs.supply}
+                                    {t.dashboard.sidebar.supply}
                                 </Button>
                                 <Button
                                     variant="ghost"
@@ -130,7 +130,7 @@ export function AssetTable({ mode }: { mode?: "supply" | "borrow" }) {
                                             : "hover:bg-muted"
                                     )}
                                 >
-                                    {t.assetTable.tabs.borrow}
+                                    {t.dashboard.sidebar.borrow}
                                 </Button>
                             </div>
                         )}
