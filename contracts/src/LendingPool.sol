@@ -60,6 +60,17 @@ contract LendingPool {
     }
     
     /**
+     * @notice E-Mode (Efficiency Mode) category data
+     * @dev Allows higher LTV for correlated assets (e.g., stablecoins)
+     */
+    struct EModeCategoryData {
+        uint16 ltv;                    // Loan-to-value (e.g., 9700 = 97%)
+        uint16 liquidationThreshold;   // Liquidation threshold (e.g., 9800 = 98%)
+        uint16 liquidationBonus;       // Liquidation bonus (e.g., 101 = 1%)
+        string label;                  // Category label (e.g., "Stablecoins")
+    }
+    
+    /**
      * @notice Asset configuration for risk management
      */
     struct AssetConfig {
@@ -67,11 +78,18 @@ contract LendingPool {
         uint256 liquidationThreshold;  // Liquidation threshold (e.g., 80% = 0.80e18)
         uint256 liquidationBonus;      // Liquidator incentive (e.g., 5% = 0.05e18)
         uint256 reserveFactor;         // Protocol fee (e.g., 10% = 0.10e18)
+        uint256 supplyCap;             // Maximum total supply (0 = unlimited)
+        uint256 borrowCap;             // Maximum total borrow (0 = unlimited)
+        uint8 eModeCategory;           // E-Mode category ID (0 = not in E-Mode)
         bool isActive;
     }
     
     mapping(address => InterestRateModel) public rateModels;
     mapping(address => AssetConfig) public assetConfigs;
+    
+    // E-Mode (Efficiency Mode) mappings
+    mapping(uint8 => EModeCategoryData) public eModeCategories;
+    mapping(address => uint8) public userEModeCategory; // User's selected E-Mode category
     
     // ============ Events ============
     
@@ -125,6 +143,44 @@ contract LendingPool {
     }
     
     /**
+     * @notice Configure an E-Mode category
+     * @param categoryId Category ID (1-255, 0 = disabled)
+     * @param ltv Loan-to-value in basis points (9700 = 97%)
+     * @param liquidationThreshold Liquidation threshold in basis points
+     * @param liquidationBonus Liquidation bonus in basis points (101 = 1%)
+     * @param label Category label
+     */
+    function setEModeCategory(
+        uint8 categoryId,
+        uint16 ltv,
+        uint16 liquidationThreshold,
+        uint16 liquidationBonus,
+        string calldata label
+    ) external onlyOwner {
+        require(categoryId > 0, "Invalid category ID");
+        require(ltv <= 10000, "Invalid LTV");
+        require(liquidationThreshold <= 10000, "Invalid threshold");
+        
+        eModeCategories[categoryId] = EModeCategoryData({
+            ltv: ltv,
+            liquidationThreshold: liquidationThreshold,
+            liquidationBonus: liquidationBonus,
+            label: label
+        });
+    }
+    
+    /**
+     * @notice Allow user to select E-Mode category
+     * @param categoryId Category ID (0 to disable E-Mode)
+     */
+    function setUserEMode(uint8 categoryId) external {
+        if (categoryId > 0) {
+            require(bytes(eModeCategories[categoryId].label).length > 0, "Invalid category");
+        }
+        userEModeCategory[msg.sender] = categoryId;
+    }
+    
+    /**
      * @notice Initialize an asset with default configuration
      * @dev Must be called before asset can be used
      */
@@ -133,7 +189,10 @@ contract LendingPool {
         uint256 collateralFactor,
         uint256 liquidationThreshold,
         uint256 liquidationBonus,
-        uint256 reserveFactor
+        uint256 reserveFactor,
+        uint256 supplyCap,
+        uint256 borrowCap,
+        uint8 eModeCategory
     ) external onlyOwner {
         require(assetConfigs[asset].isActive == false, "Asset already added");
         
@@ -142,7 +201,7 @@ contract LendingPool {
         // Initialize indexes to 1.0 (RAY precision)
         borrowIndex[asset] = RAY;
         supplyIndex[asset] = RAY;
-        lastAccrueTime[asset] = block.timestamp;
+        lastAccrueTime[asset] = uint40(block.timestamp);
         
         // Set asset configuration
         assetConfigs[asset] = AssetConfig({
@@ -150,6 +209,9 @@ contract LendingPool {
             liquidationThreshold: liquidationThreshold,
             liquidationBonus: liquidationBonus,
             reserveFactor: reserveFactor,
+            supplyCap: supplyCap,
+            borrowCap: borrowCap,
+            eModeCategory: eModeCategory,
             isActive: true
         });
         
@@ -280,6 +342,12 @@ contract LendingPool {
             riskManager.validateSupply(asset, totalSupplied[asset] + amount);
         }
         
+        // Supply cap check
+        uint256 supplyCap = assetConfigs[asset].supplyCap;
+        if (supplyCap > 0) {
+            require(totalSupplied[asset] + amount <= supplyCap, "Supply cap exceeded");
+        }
+        
         // Transfer tokens from user to pool
         bool success = IERC20(asset).transferFrom(msg.sender, address(this), amount);
         require(success, "Transfer failed");
@@ -329,6 +397,12 @@ contract LendingPool {
         // Risk check
         if (address(riskManager) != address(0)) {
             riskManager.validateBorrow(asset);
+        }
+        
+        // Borrow cap check
+        uint256 borrowCap = assetConfigs[asset].borrowCap;
+        if (borrowCap > 0) {
+            require(totalBorrowed[asset] + amount <= borrowCap, "Borrow cap exceeded");
         }
         
         // Check pool liquidity
@@ -433,6 +507,21 @@ contract LendingPool {
     }
     
     // ============ Liquidation Functions ============
+    
+    /**
+     * @notice Get liquidation close factor based on health factor
+     * @dev Aave V3 style: 50% normal, 100% emergency
+     * @param healthFactor Current health factor (RAY precision)
+     * @return Close factor in WAD (0.5e18 = 50%, 1e18 = 100%)
+     */
+    function _getCloseFactor(uint256 healthFactor) internal pure returns (uint256) {
+        // Emergency liquidation: HF < 0.95 → 100% close factor
+        if (healthFactor < 0.95e27) {
+            return WAD; // 100%
+        }
+        // Normal liquidation: HF < 1.0 → 50% close factor
+        return 0.5e18; // 50%
+    }
     
     /**
      * @notice Calculate user's health factor
@@ -557,8 +646,9 @@ contract LendingPool {
         uint256 userDebt = getUserDebt(user, debtAsset);
         require(userDebt > 0, "No debt to liquidate");
         
-        // Apply close factor (max 50% of debt can be liquidated)
-        uint256 maxLiquidatable = userDebt / 2; // 50% close factor
+        // Apply variable close factor (Aave V3 style)
+        uint256 closeFactor = _getCloseFactor(healthFactor);
+        uint256 maxLiquidatable = (userDebt * closeFactor) / WAD;
         uint256 actualDebtToCover = debtToCover > maxLiquidatable ? maxLiquidatable : debtToCover;
         
         // Calculate collateral to seize (with liquidation bonus)
