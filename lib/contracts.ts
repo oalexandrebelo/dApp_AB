@@ -48,7 +48,7 @@ export const ERC20_ABI = [
     },
 ] as const;
 
-export const LENDING_POOL_ADDRESS = "0x4da5065a1b25e6e39029299a553a4f524c72c2fe"; // Verified Arc Testnet Deployment
+export const LENDING_POOL_ADDRESS = "0x31FA94AE9E505A320aB274212B4b236FD5945829"; // LendingPool V2 - Deployed 09/12/2024
 
 export const LENDING_POOL_ABI = [
     {
@@ -114,6 +114,42 @@ export const LENDING_POOL_ABI = [
             { name: "onBehalfOf", type: "address" }
         ],
         name: "repay",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function",
+    },
+    {
+        inputs: [
+            { name: "asset", type: "address" }
+        ],
+        name: "getBorrowRate",
+        outputs: [{ name: "", type: "uint256" }],
+        stateMutability: "view",
+        type: "function",
+    },
+    {
+        inputs: [
+            { name: "asset", type: "address" }
+        ],
+        name: "getSupplyRate",
+        outputs: [{ name: "", type: "uint256" }],
+        stateMutability: "view",
+        type: "function",
+    },
+    {
+        inputs: [
+            { name: "asset", type: "address" }
+        ],
+        name: "getUtilizationRate",
+        outputs: [{ name: "", type: "uint256" }],
+        stateMutability: "view",
+        type: "function",
+    },
+    {
+        inputs: [
+            { name: "asset", type: "address" }
+        ],
+        name: "accrueInterest",
         outputs: [],
         stateMutability: "nonpayable",
         type: "function",
