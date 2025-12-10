@@ -67,7 +67,7 @@ export function BorrowedAssetsTable({ borrowedUSDC, borrowedEURC, borrowedUSYC }
                     <CardTitle>{t.dashboard.assets.borrowed_title}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="divide-y divide-border">
+                    <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
                         {borrowedAssets.map((asset) => {
                             const borrowedBalance = borrowedAmounts[asset.id as keyof typeof borrowedAmounts];
                             // eslint-disable-next-line react-hooks/rules-of-hooks

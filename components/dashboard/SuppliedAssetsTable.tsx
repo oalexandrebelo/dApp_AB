@@ -67,7 +67,7 @@ export function SuppliedAssetsTable({ suppliedUSDC, suppliedEURC, suppliedUSYC }
                     <CardTitle>Supplied Assets</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="divide-y divide-border">
+                    <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
                         {suppliedAssets.map((asset) => {
                             const suppliedBalance = suppliedAmounts[asset.id as keyof typeof suppliedAmounts];
                             // eslint-disable-next-line react-hooks/rules-of-hooks
