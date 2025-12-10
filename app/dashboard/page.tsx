@@ -7,6 +7,7 @@ import { AssetTable } from "@/components/dashboard/AssetTable";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { BorrowedAssetsTable } from "@/components/dashboard/BorrowedAssetsTable";
 import { SuppliedAssetsTable } from "@/components/dashboard/SuppliedAssetsTable";
+import { LiquidationAlert } from "@/components/dashboard/LiquidationAlert";
 import { useLanguage } from '@/lib/i18n';
 import { useNetAPY } from '@/lib/useNetAPY';
 import { useAccount, useReadContracts } from "wagmi";
@@ -118,6 +119,11 @@ export default function DashboardPage() {
                 netAPY={netAPY}
                 isConnected={isConnected}
             />
+
+            {/* Liquidation Alert - Show warnings based on health factor */}
+            {isConnected && totalBorrowed > 0 && (
+                <LiquidationAlert healthFactor={healthFactor} />
+            )}
 
             <div className="grid gap-4 md:grid-cols-2">
                 <div className="col-span-1">
