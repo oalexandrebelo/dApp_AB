@@ -1,0 +1,10 @@
+# Foundry
+out/
+cache/
+broadcast/
+
+# Backup files
+*.bak
+
+# Build info
+build-info/

@@ -48,7 +48,7 @@ export const ERC20_ABI = [
     },
 ] as const;
 
-export const LENDING_POOL_ADDRESS = "0x31FA94AE9E505A320aB274212B4b236FD5945829"; // LendingPool V2 - Deployed 09/12/2024
+export const LENDING_POOL_ADDRESS = "0x6Ad44Fd3a516730adE6cF795a3c35baEEF45f8C0"; // LendingPool V2 - Deployed 09/12/2024
 
 export const LENDING_POOL_ABI = [
     {
