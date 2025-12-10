@@ -6,6 +6,7 @@ import { HealthFactor } from "@/components/dashboard/HealthFactor";
 import { AssetTable } from "@/components/dashboard/AssetTable";
 import { StatsOverview } from "@/components/dashboard/StatsOverview";
 import { BorrowedAssetsTable } from "@/components/dashboard/BorrowedAssetsTable";
+import { SuppliedAssetsTable } from "@/components/dashboard/SuppliedAssetsTable";
 import { useLanguage } from '@/lib/i18n';
 import { useAccount, useReadContracts } from "wagmi";
 import { formatUnits } from "viem";
@@ -105,8 +106,12 @@ export default function DashboardPage() {
             />
 
             <div className="grid gap-4 md:grid-cols-2">
-                <div className="col-span-1" id="sidebar-supply">
-                    <AssetTable />
+                <div className="col-span-1">
+                    <SuppliedAssetsTable
+                        suppliedUSDC={suppliedUSDC}
+                        suppliedEURC={suppliedEURC}
+                        suppliedUSYC={suppliedUSYC}
+                    />
                 </div>
                 <div className="col-span-1">
                     <BorrowedAssetsTable
@@ -115,6 +120,10 @@ export default function DashboardPage() {
                         borrowedUSYC={borrowedUSYC}
                     />
                 </div>
+            </div>
+
+            <div className="mt-4">
+                <AssetTable />
             </div>
         </div>
     );
