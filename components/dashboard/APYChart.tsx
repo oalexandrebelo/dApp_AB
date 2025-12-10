@@ -39,48 +39,56 @@ function saveAPYSnapshot(data: APYDataPoint) {
 export function APYChart() {
     const [chartData, setChartData] = useState<APYDataPoint[]>([]);
 
-    // Fetch current APYs
-    const { data: usdcSupplyAPY } = useReadContract({
+    // Fetch current rates (per second)
+    const { data: usdcSupplyRate } = useReadContract({
         address: LENDING_POOL_ADDRESS,
         abi: LENDING_POOL_ABI,
-        functionName: 'getSupplyAPY' as any,
+        functionName: 'getSupplyRate',
         args: [USDC_ADDRESS],
     });
 
-    const { data: usdcBorrowAPY } = useReadContract({
+    const { data: usdcBorrowRate } = useReadContract({
         address: LENDING_POOL_ADDRESS,
         abi: LENDING_POOL_ABI,
-        functionName: 'getBorrowAPY' as any,
+        functionName: 'getBorrowRate',
         args: [USDC_ADDRESS],
     });
 
-    const { data: eurcSupplyAPY } = useReadContract({
+    const { data: eurcSupplyRate } = useReadContract({
         address: LENDING_POOL_ADDRESS,
         abi: LENDING_POOL_ABI,
-        functionName: 'getSupplyAPY' as any,
+        functionName: 'getSupplyRate',
         args: [EURC_ADDRESS],
     });
 
-    const { data: eurcBorrowAPY } = useReadContract({
+    const { data: eurcBorrowRate } = useReadContract({
         address: LENDING_POOL_ADDRESS,
         abi: LENDING_POOL_ABI,
-        functionName: 'getBorrowAPY' as any,
+        functionName: 'getBorrowRate',
         args: [EURC_ADDRESS],
     });
 
-    const { data: usycSupplyAPY } = useReadContract({
+    const { data: usycSupplyRate } = useReadContract({
         address: LENDING_POOL_ADDRESS,
         abi: LENDING_POOL_ABI,
-        functionName: 'getSupplyAPY' as any,
+        functionName: 'getSupplyRate',
         args: [USYC_ADDRESS],
     });
 
-    const { data: usycBorrowAPY } = useReadContract({
+    const { data: usycBorrowRate } = useReadContract({
         address: LENDING_POOL_ADDRESS,
         abi: LENDING_POOL_ABI,
-        functionName: 'getBorrowAPY' as any,
+        functionName: 'getBorrowRate',
         args: [USYC_ADDRESS],
     });
+
+    // Helper function to convert rate per second to APY percentage
+    const rateToAPY = (rate: bigint | undefined): number => {
+        if (!rate) return 0;
+        const SECONDS_PER_YEAR = 365 * 24 * 60 * 60;
+        // rate is per second in 1e18, convert to APY percentage
+        return (Number(rate) * SECONDS_PER_YEAR) / 1e18;
+    };
 
     useEffect(() => {
         // Load historical data
@@ -92,22 +100,22 @@ export function APYChart() {
         const oneHourAgo = Date.now() - (60 * 60 * 1000);
 
         if (!lastSnapshot || lastSnapshot.timestamp < oneHourAgo) {
-            if (usdcSupplyAPY && usdcBorrowAPY) {
+            if (usdcSupplyRate && usdcBorrowRate) {
                 const snapshot: APYDataPoint = {
                     timestamp: Date.now(),
                     date: new Date().toLocaleDateString(),
-                    USDC_Supply: Number(usdcSupplyAPY) / 100,
-                    USDC_Borrow: Number(usdcBorrowAPY) / 100,
-                    EURC_Supply: Number(eurcSupplyAPY || 0) / 100,
-                    EURC_Borrow: Number(eurcBorrowAPY || 0) / 100,
-                    USYC_Supply: Number(usycSupplyAPY || 0) / 100,
-                    USYC_Borrow: Number(usycBorrowAPY || 0) / 100,
+                    USDC_Supply: rateToAPY(usdcSupplyRate as bigint),
+                    USDC_Borrow: rateToAPY(usdcBorrowRate as bigint),
+                    EURC_Supply: rateToAPY(eurcSupplyRate as bigint),
+                    EURC_Borrow: rateToAPY(eurcBorrowRate as bigint),
+                    USYC_Supply: rateToAPY(usycSupplyRate as bigint),
+                    USYC_Borrow: rateToAPY(usycBorrowRate as bigint),
                 };
                 saveAPYSnapshot(snapshot);
                 setChartData([...history, snapshot]);
             }
         }
-    }, [usdcSupplyAPY, usdcBorrowAPY, eurcSupplyAPY, eurcBorrowAPY, usycSupplyAPY, usycBorrowAPY]);
+    }, [usdcSupplyRate, usdcBorrowRate, eurcSupplyRate, eurcBorrowRate, usycSupplyRate, usycBorrowRate]);
 
     if (chartData.length === 0) {
         return (
