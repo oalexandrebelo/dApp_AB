@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowUpRight } from "lucide-react";
 import { HealthFactor } from "@/components/dashboard/HealthFactor";
@@ -41,7 +42,7 @@ export default function DashboardPage() {
         ],
         query: {
             enabled: !!address,
-            refetchInterval: 10000
+            refetchInterval: 30000 // ✅ Changed from 10000 (30s instead of 10s)
         }
     });
 
@@ -68,14 +69,18 @@ export default function DashboardPage() {
     const totalSupplied = suppliedUSDC + suppliedEURC + suppliedUSYC;
     const totalBorrowed = borrowedUSDC + borrowedEURC + borrowedUSYC;
 
-    const netWorth = totalWallet + totalSupplied - totalBorrowed;
+    // ✅ Memoized calculations
+    const netWorth = useMemo(() =>
+        totalWallet + totalSupplied - totalBorrowed,
+        [totalWallet, totalSupplied, totalBorrowed]
+    );
 
     const LIQUIDATION_THRESHOLD = 0.8;
-    let healthFactor = 999;
-    if (totalBorrowed > 0) {
+    const healthFactor = useMemo(() => {
+        if (totalBorrowed === 0) return 999;
         const calculatedHF = (totalSupplied * LIQUIDATION_THRESHOLD) / totalBorrowed;
-        healthFactor = Math.min(calculatedHF, 999);
-    }
+        return Math.min(calculatedHF, 999);
+    }, [totalSupplied, totalBorrowed]);
 
     const netAPY = useNetAPY(
         suppliedUSDC,

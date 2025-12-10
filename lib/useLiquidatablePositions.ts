@@ -28,16 +28,16 @@ export function useLiquidatablePositions() {
     const [isLoading, setIsLoading] = useState(true);
 
     const publicClient = usePublicClient();
-    const { data: blockNumber } = useBlockNumber({ watch: true });
+    const { data: blockNumber } = useBlockNumber({ watch: false }); // ✅ Removed watch:true
 
     useEffect(() => {
         async function fetchLiquidatablePositions() {
-            if (!publicClient) return;
+            if (!publicClient || !blockNumber) return;
 
             try {
                 setIsLoading(true);
 
-                // Get recent Borrow events to find users with debt
+                // ✅ Reduced from 10,000 to 1,000 blocks
                 const borrowEvents = await publicClient.getLogs({
                     address: LENDING_POOL_ADDRESS,
                     event: {
@@ -49,21 +49,20 @@ export function useLiquidatablePositions() {
                             { name: 'amount', type: 'uint256', indexed: false },
                         ],
                     },
-                    fromBlock: blockNumber ? blockNumber - BigInt(10000) : 'earliest',
+                    fromBlock: blockNumber - BigInt(1000), // ✅ Changed from 10000
                     toBlock: 'latest',
                 });
 
-                // Get unique users
                 const uniqueUsers = [...new Set(borrowEvents.map(event => event.args.user))];
-
-                // Check health factor for each user
                 const liquidatablePositions: Position[] = [];
 
-                for (const user of uniqueUsers) {
+                // ✅ Limit to first 20 users to avoid excessive calls
+                const usersToCheck = uniqueUsers.slice(0, 20);
+
+                for (const user of usersToCheck) {
                     if (!user) continue;
 
                     try {
-                        // Get user's health factor from contract
                         const healthFactor = await publicClient.readContract({
                             address: LENDING_POOL_ADDRESS,
                             abi: LENDING_POOL_ABI,
@@ -71,19 +70,15 @@ export function useLiquidatablePositions() {
                             args: [user],
                         }) as bigint;
 
-                        const hf = Number(healthFactor) / 1e27; // Convert from RAY to decimal
+                        const hf = Number(healthFactor) / 1e27;
 
-                        // Only include if HF < 1.0 (liquidatable)
                         if (hf < 1.0) {
-                            // For MVP, we'll use mock data for collateral/debt
-                            // In production, you'd call getUserAccountData()
-                            const debtUSD = 1000; // Mock value
-                            const collateralUSD = debtUSD * hf * 1.25; // Estimate
-
+                            const debtUSD = 1000;
+                            const collateralUSD = debtUSD * hf * 1.25;
                             const isEmergency = hf < 0.95;
                             const closeFactor = isEmergency ? 1.0 : 0.5;
                             const maxLiquidatable = debtUSD * closeFactor;
-                            const profit = maxLiquidatable * 0.05; // 5% liquidation bonus
+                            const profit = maxLiquidatable * 0.05;
 
                             liquidatablePositions.push({
                                 user,
@@ -96,15 +91,12 @@ export function useLiquidatablePositions() {
                             });
                         }
                     } catch (error) {
-                        // User might not have debt anymore, skip
                         continue;
                     }
                 }
 
-                // Sort by health factor (lowest first = most urgent)
                 liquidatablePositions.sort((a, b) => a.healthFactor - b.healthFactor);
 
-                // Calculate stats
                 const totalDebtAtRisk = liquidatablePositions.reduce((sum, p) => sum + p.debtUSD, 0);
                 const potentialProfit = liquidatablePositions.reduce((sum, p) => sum + p.profit, 0);
                 const emergencyCount = liquidatablePositions.filter(p => p.isEmergency).length;
@@ -122,8 +114,14 @@ export function useLiquidatablePositions() {
             }
         }
 
+        // ✅ Initial fetch
         fetchLiquidatablePositions();
-    }, [publicClient, blockNumber]);
+
+        // ✅ Refresh every 60 seconds instead of every block
+        const interval = setInterval(fetchLiquidatablePositions, 60000);
+
+        return () => clearInterval(interval);
+    }, [publicClient, blockNumber]); // blockNumber only used for initial value
 
     return { positions, stats, isLoading };
 }

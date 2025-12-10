@@ -34,8 +34,7 @@ function AssetRow({ asset, activeTab, openModal, t }: any) {
         args: [address!],
         query: {
             enabled: !!address,
-            // Refresh every 10s
-            refetchInterval: 10000
+            refetchInterval: 30000 // ✅ Changed from 10000 (30s instead of 10s)
         }
     });
 
