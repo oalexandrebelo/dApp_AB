@@ -104,11 +104,14 @@ export default function DashboardPage() {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h2 className="text-2xl font-bold tracking-tight">{t.dashboard.header.title}</h2>
-                    <p className="text-sm text-muted-foreground">{t.dashboard.header.subtitle}</p>
+            {/* Header with Wallet Status */}
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-4">
+                    <div>
+                        <h2 className="text-2xl font-bold tracking-tight">{t.dashboard.header.title}</h2>
+                        <p className="text-sm text-muted-foreground">{t.dashboard.header.subtitle}</p>
+                    </div>
+                    <WalletStatus />
                 </div>
                 <button
                     onClick={handleRefresh}
