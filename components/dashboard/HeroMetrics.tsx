@@ -68,7 +68,10 @@ export function HeroMetrics({
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between mb-2">
                             <p className="text-sm text-muted-foreground">Total Supplied</p>
-                            <TrendingUp className="h-4 w-4 text-green-500" />
+                            <div className="flex items-center gap-1">
+                                <TrendingUp className="h-4 w-4 text-green-500" />
+                                <span className="text-lg">📈</span>
+                            </div>
                         </div>
                         <p className="text-3xl font-bold text-green-500">
                             ${totalSupplied.toFixed(2)}
@@ -84,7 +87,10 @@ export function HeroMetrics({
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between mb-2">
                             <p className="text-sm text-muted-foreground">Total Borrowed</p>
-                            <TrendingDown className="h-4 w-4 text-red-500" />
+                            <div className="flex items-center gap-1">
+                                <TrendingDown className="h-4 w-4 text-red-500" />
+                                <span className="text-lg">📉</span>
+                            </div>
                         </div>
                         <p className="text-3xl font-bold text-red-500">
                             ${totalBorrowed.toFixed(2)}

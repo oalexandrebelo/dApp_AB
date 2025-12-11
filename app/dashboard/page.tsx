@@ -18,6 +18,7 @@ import { APYChart } from "@/components/dashboard/APYChart";
 import { useLanguage } from '@/lib/i18n';
 import { useNetAPY } from '@/lib/useNetAPY';
 import { WalletStatus } from '@/components/WalletStatus';
+import { CommandPalette } from '@/components/CommandPalette';
 import { useAccount, useReadContracts } from "wagmi";
 import { formatUnits } from "viem";
 import { USDC_ADDRESS, EURC_ADDRESS, USYC_ADDRESS, LENDING_POOL_ADDRESS, LENDING_POOL_ABI, ERC20_ABI } from "@/lib/contracts";
@@ -27,6 +28,7 @@ export default function DashboardPage() {
     const { address, isConnected } = useAccount();
     const [isBridgeModalOpen, setIsBridgeModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<"markets" | "portfolio" | "analytics">("markets");
+    const [commandOpen, setCommandOpen] = useState(false);
 
     const { data: results, refetch, isRefetching } = useReadContracts({
         contracts: [
@@ -226,6 +228,22 @@ export default function DashboardPage() {
                 isOpen={isBridgeModalOpen}
                 onClose={() => setIsBridgeModalOpen(false)}
             />
+
+            {/* Command Palette */}
+            <CommandPalette
+                open={commandOpen}
+                onOpenChange={setCommandOpen}
+                onNavigate={(tab) => setActiveTab(tab as any)}
+                onAction={(action) => {
+                    if (action === "bridge") setIsBridgeModalOpen(true);
+                    // Add other actions as needed
+                }}
+            />
+
+            {/* Keyboard Shortcut Hint */}
+            <div className="fixed bottom-4 right-4 text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-full shadow-lg">
+                Press <kbd className="px-1.5 py-0.5 bg-background rounded border">⌘K</kbd> or <kbd className="px-1.5 py-0.5 bg-background rounded border">Ctrl+K</kbd> for commands
+            </div>
         </div>
     );
 }
