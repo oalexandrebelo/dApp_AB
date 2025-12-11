@@ -8,6 +8,7 @@ import { formatUnits } from 'viem';
 interface AssetData {
     name: string;
     value: number;
+    [key: string]: any; // Index signature for recharts compatibility
 }
 
 export function useAssetDistribution() {
