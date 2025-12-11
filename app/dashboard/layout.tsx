@@ -13,12 +13,7 @@ export default function DashboardLayout({
     return (
         <div className="min-h-screen bg-background text-foreground">
             {/* Top Navigation Bar */}
-            <nav className="fixed top-0 w-full z-50 border-b bg-background/80 backdrop-blur-xl h-16 flex items-center px-6 justify-between">
-                <div className="flex items-center gap-2 font-bold text-xl tracking-tight">
-                    <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white" >A</div>
-                    Arc Network
-                </div>
-
+            <nav className="fixed top-0 w-full z-50 border-b bg-background/80 backdrop-blur-xl h-16 flex items-center px-6 justify-end">
                 <div className="flex items-center gap-4">
                     <ConnectButton
                         accountStatus={{

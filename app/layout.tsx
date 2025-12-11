@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
     title: "Nexux Lend - DeFi Lending Protocol",
-    description: "Supply, borrow, and earn with Arc Network's premier lending protocol",
+    description: "Supply, borrow, and earn with Nexux Lend - Premier DeFi lending protocol",
     icons: {
         icon: '/favicon.ico',
         apple: '/apple-touch-icon.png',

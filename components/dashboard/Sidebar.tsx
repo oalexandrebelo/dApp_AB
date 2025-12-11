@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/lib/i18n';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
+import Image from 'next/image';
+
 export function Sidebar() {
     const pathname = usePathname();
     const { t } = useLanguage();
@@ -46,10 +48,15 @@ export function Sidebar() {
 
     return (
         <div className="flex flex-col h-full w-64 bg-card/50 backdrop-blur-xl">
+            {/* Logo */}
             <div className="p-6">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                    ArcLend
-                </h1>
+                <Image
+                    src="/logo-icon.svg"
+                    alt="Nexux Lend"
+                    width={40}
+                    height={40}
+                    priority
+                />
             </div>
 
             <nav className="flex-1 px-4 space-y-2">
@@ -77,10 +84,6 @@ export function Sidebar() {
                 <div className="bg-secondary/30 rounded-xl p-4 mb-4">
                     <p className="text-xs text-muted-foreground mb-2">Language</p>
                     <LanguageSwitcher />
-                </div>
-                <div className="bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-xl p-4 border border-indigo-500/20">
-                    <h3 className="text-sm font-semibold text-indigo-300 mb-1">Arc Testnet</h3>
-                    <p className="text-xs text-indigo-400/80">Block: #5,420,092</p>
                 </div>
             </div>
         </div>

@@ -104,12 +104,6 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            {/* E-Mode Card */}
-            <EModeCard
-                currentCategory={eModeCategory}
-                onSuccess={refetch}
-            />
-
             {/* Protocol Stats */}
             <ProtocolStats />
         </div>
