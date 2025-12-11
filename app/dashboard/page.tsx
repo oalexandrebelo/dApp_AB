@@ -17,6 +17,7 @@ import { TransactionHistory } from "@/components/dashboard/TransactionHistory";
 import { APYChart } from "@/components/dashboard/APYChart";
 import { useLanguage } from '@/lib/i18n';
 import { useNetAPY } from '@/lib/useNetAPY';
+import { WalletStatus } from '@/components/WalletStatus';
 import { useAccount, useReadContracts } from "wagmi";
 import { formatUnits } from "viem";
 import { USDC_ADDRESS, EURC_ADDRESS, USYC_ADDRESS, LENDING_POOL_ADDRESS, LENDING_POOL_ABI, ERC20_ABI } from "@/lib/contracts";
