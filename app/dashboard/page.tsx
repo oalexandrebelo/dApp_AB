@@ -26,6 +26,9 @@ import { parseBalances } from "@/lib/contractHelpers";
 import { calculateHealthFactor } from "@/lib/healthFactor";
 import { HeroMetricsSkeleton, AssetTableSkeleton } from "@/components/SkeletonLoaders";
 import { Header } from "@/components/Header";
+import { EarningsChart } from "@/components/analytics/EarningsChart";
+import { AssetDistribution } from "@/components/analytics/AssetDistribution";
+import { HealthFactorHistory } from "@/components/analytics/HealthFactorHistory";
 
 export default function DashboardPage() {
     const { t } = useLanguage();
@@ -156,11 +159,26 @@ export default function DashboardPage() {
     // Analytics Tab Content
     const analyticsContent = (
         <div className="space-y-6">
-            {/* APY Chart */}
-            <APYChart />
+            {/* Charts Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Earnings Chart */}
+                <EarningsChart />
 
-            {/* Transaction History */}
-            <TransactionHistory />
+                {/* Asset Distribution */}
+                <AssetDistribution />
+            </div>
+
+            {/* Health Factor History - Full Width */}
+            <HealthFactorHistory />
+
+            {/* Existing Components */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* APY Chart */}
+                <APYChart />
+
+                {/* Transaction History */}
+                <TransactionHistory />
+            </div>
         </div>
     );
 

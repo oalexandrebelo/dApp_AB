@@ -7,8 +7,6 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/lib/i18n';
 import { LanguageSwitcher } from '../ui/LanguageSwitcher';
 
-import Image from 'next/image';
-
 export function Sidebar() {
     const pathname = usePathname();
     const { t } = useLanguage();
@@ -48,18 +46,7 @@ export function Sidebar() {
 
     return (
         <div className="flex flex-col h-full w-64 bg-card/50 backdrop-blur-xl">
-            {/* Logo */}
-            <div className="p-6">
-                <Image
-                    src="/logo-icon.svg"
-                    alt="Nexux Lend"
-                    width={40}
-                    height={40}
-                    priority
-                />
-            </div>
-
-            <nav className="flex-1 px-4 space-y-2">
+            <nav className="flex-1 px-4 py-6 space-y-2">
                 {navigation.map((item) => {
                     const isActive = pathname === item.href;
                     return (

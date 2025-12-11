@@ -52,50 +52,50 @@ export function HeroMetrics({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Net Worth - Primary */}
                 <Card className="md:col-span-1 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-                    <CardContent className="pt-6 text-center">
-                        <p className="text-sm text-muted-foreground mb-2">Net Worth</p>
-                        <p className="text-5xl font-bold tracking-tight">
+                    <CardContent className="p-4 text-center">
+                        <p className="text-xs text-muted-foreground mb-2">Net Worth</p>
+                        <p className="text-4xl font-bold tracking-tight">
                             ${netWorth.toFixed(2)}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-2">
+                        <p className="text-xs text-muted-foreground mt-1">
                             Across all assets
                         </p>
                     </CardContent>
                 </Card>
 
                 {/* Total Supplied */}
-                <Card className="hover:shadow-lg transition-shadow">
-                    <CardContent className="pt-6">
+                <Card className="hover:shadow-elevation-2 transition-shadow">
+                    <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
-                            <p className="text-sm text-muted-foreground">Total Supplied</p>
+                            <p className="text-xs text-muted-foreground">Total Supplied</p>
                             <div className="flex items-center gap-1">
-                                <TrendingUp className="h-4 w-4 text-green-500" />
+                                <TrendingUp className="h-4 w-4 text-success-500" />
                                 <span className="text-lg">📈</span>
                             </div>
                         </div>
-                        <p className="text-3xl font-bold text-green-500">
+                        <p className="text-3xl font-bold text-success-500">
                             ${totalSupplied.toFixed(2)}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-2">
+                        <p className="text-xs text-muted-foreground mt-1">
                             Earning yield
                         </p>
                     </CardContent>
                 </Card>
 
                 {/* Total Borrowed */}
-                <Card className="hover:shadow-lg transition-shadow">
-                    <CardContent className="pt-6">
+                <Card className="hover:shadow-elevation-2 transition-shadow">
+                    <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
-                            <p className="text-sm text-muted-foreground">Total Borrowed</p>
+                            <p className="text-xs text-muted-foreground">Total Borrowed</p>
                             <div className="flex items-center gap-1">
-                                <TrendingDown className="h-4 w-4 text-red-500" />
+                                <TrendingDown className="h-4 w-4 text-error-500" />
                                 <span className="text-lg">📉</span>
                             </div>
                         </div>
-                        <p className="text-3xl font-bold text-red-500">
+                        <p className="text-3xl font-bold text-error-500">
                             ${totalBorrowed.toFixed(2)}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-2">
+                        <p className="text-xs text-muted-foreground mt-1">
                             Accruing interest
                         </p>
                     </CardContent>
