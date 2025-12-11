@@ -119,11 +119,11 @@ export function EModeSelector({ currentCategory, onSuccess }: EModeSelectorProps
 
                 {/* E-Mode Active Alert */}
                 {isEModeActive && (
-                    <Alert className="border-green-500 bg-green-950/20">
-                        <TrendingUp className="h-4 w-4 text-green-500" />
-                        <AlertTitle className="text-green-400">E-Mode Active! 🚀</AlertTitle>
+                    <Alert className="border-success-500 bg-success-950/20">
+                        <TrendingUp className="h-4 w-4 text-success-500" />
+                        <AlertTitle className="text-success-400">E-Mode Active! 🚀</AlertTitle>
                         <AlertDescription className="text-sm">
-                            You can now borrow up to <span className="font-bold text-green-400">97% LTV</span> with stablecoins.
+                            You can now borrow up to <span className="font-bold text-success-400">97% LTV</span> with stablecoins.
                             That's <span className="font-bold">30% more capital efficient</span> than standard mode!
                         </AlertDescription>
                     </Alert>
@@ -153,7 +153,7 @@ export function EModeSelector({ currentCategory, onSuccess }: EModeSelectorProps
                     </div>
                 )}
                 {isSuccess && (
-                    <div className="text-sm text-green-500">
+                    <div className="text-sm text-success-500">
                         ✅ E-Mode updated successfully!
                     </div>
                 )}
@@ -161,3 +161,4 @@ export function EModeSelector({ currentCategory, onSuccess }: EModeSelectorProps
         </Card>
     );
 }
+

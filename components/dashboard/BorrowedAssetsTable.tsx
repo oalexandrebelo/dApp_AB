@@ -63,7 +63,7 @@ function BorrowedAssetRow({ asset, borrowedBalance, onRepay }: any) {
 
             <Button
                 size="sm"
-                className="rounded-full bg-green-500 hover:bg-green-600 text-white min-w-[100px] h-7 text-xs"
+                className="rounded-full bg-success-500 hover:bg-success-600 text-white min-w-[100px] h-7 text-xs"
                 onClick={() => onRepay(asset, borrowedBalance)}
                 disabled={isLoading}
             >
@@ -147,3 +147,4 @@ export function BorrowedAssetsTable({ borrowedUSDC, borrowedEURC, borrowedUSYC }
         </>
     );
 }
+

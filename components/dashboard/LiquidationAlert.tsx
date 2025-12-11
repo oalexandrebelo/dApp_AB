@@ -72,12 +72,12 @@ export function LiquidationAlert({ healthFactor }: LiquidationAlertProps) {
     // Safe: HF >= 1.2
     if (healthFactor >= 1.2 && healthFactor < 999) {
         return (
-            <Alert variant="default" className="border-green-500/30 bg-green-950/20">
-                <Shield className="h-5 w-5 text-green-500" />
-                <AlertTitle className="text-lg font-bold text-green-400">✅ Healthy Position</AlertTitle>
+            <Alert variant="default" className="border-success-500/30 bg-success-950/20">
+                <Shield className="h-5 w-5 text-success-500" />
+                <AlertTitle className="text-lg font-bold text-success-400">✅ Healthy Position</AlertTitle>
                 <AlertDescription className="mt-2">
                     <p>
-                        Your Health Factor is <span className="text-green-400 font-semibold">{healthFactor.toFixed(3)}</span>
+                        Your Health Factor is <span className="text-success-400 font-semibold">{healthFactor.toFixed(3)}</span>
                     </p>
                     <p className="text-sm text-muted-foreground mt-1">
                         Your position is safe. Keep monitoring market conditions.
@@ -89,12 +89,12 @@ export function LiquidationAlert({ healthFactor }: LiquidationAlertProps) {
 
     // Extremely safe: HF >= 999 (capped)
     return (
-        <Alert variant="default" className="border-green-500/30 bg-green-950/20">
-            <Shield className="h-5 w-5 text-green-500" />
-            <AlertTitle className="text-lg font-bold text-green-400">✅ Extremely Safe Position</AlertTitle>
+        <Alert variant="default" className="border-success-500/30 bg-success-950/20">
+            <Shield className="h-5 w-5 text-success-500" />
+            <AlertTitle className="text-lg font-bold text-success-400">✅ Extremely Safe Position</AlertTitle>
             <AlertDescription className="mt-2">
                 <p>
-                    Your Health Factor is <span className="text-green-400 font-semibold">999+ (Excellent)</span>
+                    Your Health Factor is <span className="text-success-400 font-semibold">999+ (Excellent)</span>
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
                     Your position has very low liquidation risk.
@@ -103,3 +103,4 @@ export function LiquidationAlert({ healthFactor }: LiquidationAlertProps) {
         </Alert>
     );
 }
+

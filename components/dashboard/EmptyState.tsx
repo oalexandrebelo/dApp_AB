@@ -16,7 +16,7 @@ export function EmptyState({ type, onAction }: EmptyStateProps) {
             title: "No Assets Supplied",
             description: "Supply assets to start earning yield on your crypto holdings.",
             action: "Go to Markets",
-            color: "text-green-500",
+            color: "text-success-500",
         },
         borrow: {
             icon: Package,
@@ -46,3 +46,4 @@ export function EmptyState({ type, onAction }: EmptyStateProps) {
         </Card>
     );
 }
+

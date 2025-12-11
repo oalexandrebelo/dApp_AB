@@ -31,7 +31,7 @@ function SuppliedAssetRow({ asset, suppliedBalance, onWithdraw }: any) {
     return (
         <div className="grid grid-cols-[1.5fr_1.2fr_auto] gap-4 items-center p-4 hover:bg-white/5 transition">
             <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-green-500/20 flex items-center justify-center text-xs font-bold text-green-400">
+                <div className="h-8 w-8 rounded-full bg-success-500/20 flex items-center justify-center text-xs font-bold text-success-400">
                     {asset.symbol[0]}
                 </div>
                 <div>
@@ -48,12 +48,12 @@ function SuppliedAssetRow({ asset, suppliedBalance, onWithdraw }: any) {
                     </>
                 ) : (
                     <>
-                        <div className="font-bold text-green-400">
+                        <div className="font-bold text-success-400">
                             {actualBalance > 0 ? actualBalance.toFixed(2) : suppliedBalance.toFixed(2)}
                         </div>
-                        <div className="text-xs text-green-500/70">{supplyAPY} APY</div>
+                        <div className="text-xs text-success-500/70">{supplyAPY} APY</div>
                         {interestEarned > 0.001 && (
-                            <div className="text-xs text-green-400 font-semibold">
+                            <div className="text-xs text-success-400 font-semibold">
                                 +${interestEarned.toFixed(4)} earned
                             </div>
                         )}
@@ -147,3 +147,4 @@ export function SuppliedAssetsTable({ suppliedUSDC, suppliedEURC, suppliedUSYC }
         </>
     );
 }
+

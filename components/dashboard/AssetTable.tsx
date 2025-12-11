@@ -56,7 +56,7 @@ function AssetRow({ asset, activeTab, openModal, t }: any) {
             </div>
 
             <div className="text-right">
-                <div className={cn("font-bold", activeTab === "supply" ? "text-green-400" : "text-orange-400")}>
+                <div className={cn("font-bold", activeTab === "supply" ? "text-success-400" : "text-orange-400")}>
                     {activeTab === "supply" ? supplyAPY : borrowAPY}
                 </div>
                 <div className="text-xs text-muted-foreground">{activeTab === "supply" ? t.dashboard.asset_table.apy : "Variable APY"}</div>
@@ -185,3 +185,4 @@ export function AssetTable({ mode }: { mode?: "supply" | "borrow" }) {
         </>
     );
 }
+

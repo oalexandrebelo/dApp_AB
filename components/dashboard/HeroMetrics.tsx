@@ -35,7 +35,7 @@ export function HeroMetrics({
     }
 
     const getHealthFactorColor = (hf: number) => {
-        if (hf >= 2) return "text-green-500";
+        if (hf >= 2) return "text-success-500";
         if (hf >= 1.2) return "text-yellow-500";
         return "text-red-500";
     };
@@ -106,7 +106,7 @@ export function HeroMetrics({
             {totalBorrowed > 0 && (
                 <Card className={cn(
                     "border-2",
-                    healthFactor >= 2 ? "border-green-500/20 bg-green-500/5" :
+                    healthFactor >= 2 ? "border-success-500/20 bg-success-500/5" :
                         healthFactor >= 1.2 ? "border-yellow-500/20 bg-yellow-500/5" :
                             "border-red-500/20 bg-red-500/5"
                 )}>
@@ -118,7 +118,7 @@ export function HeroMetrics({
                                 </Web3Tooltip>
                                 <span className={cn(
                                     "text-xs px-2 py-1 rounded-full",
-                                    healthFactor >= 2 ? "bg-green-500/20 text-green-700" :
+                                    healthFactor >= 2 ? "bg-success-500/20 text-success-700" :
                                         healthFactor >= 1.2 ? "bg-yellow-500/20 text-yellow-700" :
                                             "bg-red-500/20 text-red-700"
                                 )}>
@@ -141,7 +141,7 @@ export function HeroMetrics({
                                 <div
                                     className={cn(
                                         "h-full transition-all",
-                                        healthFactor >= 2 ? "bg-green-500" :
+                                        healthFactor >= 2 ? "bg-success-500" :
                                             healthFactor >= 1.2 ? "bg-yellow-500" :
                                                 "bg-red-500"
                                     )}
@@ -161,3 +161,4 @@ export function HeroMetrics({
         </div>
     );
 }
+

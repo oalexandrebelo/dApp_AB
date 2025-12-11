@@ -73,16 +73,16 @@ export function EModeCard({ currentCategory, onSuccess }: EModeCardProps) {
                 <div className="flex items-center justify-between">
                     <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                            <Zap className={`h-4 w-4 ${isEModeActive ? 'text-green-500' : 'text-muted-foreground'}`} />
+                            <Zap className={`h-4 w-4 ${isEModeActive ? 'text-success-500' : 'text-muted-foreground'}`} />
                             <span className="text-sm font-medium">Efficiency Mode</span>
                         </div>
                         <div className="text-xs text-muted-foreground">
                             {currentCategoryData?.name} • {currentCategoryData?.ltv} LTV
                         </div>
                         {isEModeActive && (
-                            <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-green-950/30 border border-green-500/30">
-                                <TrendingUp className="h-3 w-3 text-green-500" />
-                                <span className="text-xs text-green-400 font-medium">Active</span>
+                            <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-full bg-success-950/30 border border-success-500/30">
+                                <TrendingUp className="h-3 w-3 text-success-500" />
+                                <span className="text-xs text-success-400 font-medium">Active</span>
                             </div>
                         )}
                     </div>
@@ -170,7 +170,7 @@ export function EModeCard({ currentCategory, onSuccess }: EModeCardProps) {
                                     </div>
                                 )}
                                 {isSuccess && (
-                                    <div className="text-sm text-green-500 font-medium">
+                                    <div className="text-sm text-success-500 font-medium">
                                         ✅ E-Mode updated successfully!
                                     </div>
                                 )}
@@ -182,3 +182,4 @@ export function EModeCard({ currentCategory, onSuccess }: EModeCardProps) {
         </Card>
     );
 }
+

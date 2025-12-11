@@ -39,7 +39,7 @@ export function StatsOverview({ netWorth, totalSupplied, totalBorrowed, netAPY, 
                     <ArrowUpRight className="h-4 w-4 text-purple-400" />
                 </CardHeader>
                 <CardContent>
-                    <div className={`text-2xl font-bold ${netAPY.startsWith('+') ? 'text-green-400' : netAPY.startsWith('-') ? 'text-red-400' : ''}`}>
+                    <div className={`text-2xl font-bold ${netAPY.startsWith('+') ? 'text-success-400' : netAPY.startsWith('-') ? 'text-red-400' : ''}`}>
                         {isConnected ? netAPY : '0.00%'}
                     </div>
                     <p className="text-xs text-muted-foreground">Earnings - Costs</p>
@@ -74,3 +74,4 @@ export function StatsOverview({ netWorth, totalSupplied, totalBorrowed, netAPY, 
         </div>
     );
 }
+

@@ -65,7 +65,7 @@ export function TransactionHistory() {
     const getTypeIcon = (type: string) => {
         switch (type) {
             case 'supply':
-                return <ArrowUpRight className="h-4 w-4 text-green-500" />;
+                return <ArrowUpRight className="h-4 w-4 text-success-500" />;
             case 'borrow':
                 return <ArrowDownRight className="h-4 w-4 text-orange-500" />;
             case 'repay':
@@ -192,3 +192,4 @@ export function TransactionHistory() {
         </Card>
     );
 }
+

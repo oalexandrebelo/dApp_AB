@@ -16,13 +16,13 @@ export function HealthFactor({ value }: HealthFactorProps) {
     else if (value < 1.5) status = "warning";
 
     const colorMap = {
-        healthy: "text-green-500",
+        healthy: "text-success-500",
         warning: "text-yellow-500",
         critical: "text-red-500",
     };
 
     const bgMap = {
-        healthy: "bg-green-500/10 border-green-500/20",
+        healthy: "bg-success-500/10 border-success-500/20",
         warning: "bg-yellow-500/10 border-yellow-500/20",
         critical: "bg-red-500/10 border-red-500/20",
     };
@@ -52,7 +52,7 @@ export function HealthFactor({ value }: HealthFactorProps) {
             <div className="flex flex-col items-end gap-1">
                 <div className="h-2.5 w-24 bg-background/50 border border-muted-foreground/20 rounded-full overflow-hidden">
                     <motion.div
-                        className={cn("h-full", status === "healthy" ? "bg-green-500" : status === "warning" ? "bg-yellow-500" : "bg-red-500")}
+                        className={cn("h-full", status === "healthy" ? "bg-success-500" : status === "warning" ? "bg-yellow-500" : "bg-red-500")}
                         initial={{ width: 0 }}
                         animate={{ width: `${Math.min(value * 20, 100)}%` }}
                         transition={{ duration: 1, ease: "easeOut" }}
@@ -65,3 +65,4 @@ export function HealthFactor({ value }: HealthFactorProps) {
         </div>
     );
 }
+

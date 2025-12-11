@@ -90,10 +90,10 @@ export function TransactionHistoryTable() {
                             <TableRow key={tx.hash}>
                                 <TableCell>
                                     <div className="flex items-center gap-2">
-                                        <div className={`p-2 rounded-full ${tx.type === 'supply' ? 'bg-green-500/10 text-green-500' :
+                                        <div className={`p-2 rounded-full ${tx.type === 'supply' ? 'bg-success-500/10 text-success-500' :
                                                 tx.type === 'withdraw' ? 'bg-orange-500/10 text-orange-500' :
                                                     tx.type === 'borrow' ? 'bg-indigo-500/10 text-indigo-500' :
-                                                        tx.type === 'repay' ? 'bg-green-500/10 text-green-500' :
+                                                        tx.type === 'repay' ? 'bg-success-500/10 text-success-500' :
                                                             'bg-orange-500/10 text-orange-500' // Transfer/Send
                                             }`}>
                                             {tx.type === 'supply' ? <ArrowUpRight className="h-4 w-4" /> :
@@ -127,7 +127,7 @@ export function TransactionHistoryTable() {
                                 <TableCell>
                                     <Badge variant={tx.status === 'success' ? 'default' : tx.status === 'pending' ? 'secondary' : 'destructive'}
                                         className={`
-                                            ${tx.status === 'success' ? 'bg-green-500/15 text-green-600 hover:bg-green-500/25 border-green-200' : ''}
+                                            ${tx.status === 'success' ? 'bg-success-500/15 text-success-600 hover:bg-success-500/25 border-success-200' : ''}
                                             ${tx.status === 'pending' ? 'bg-yellow-500/15 text-yellow-600 hover:bg-yellow-500/25 border-yellow-200' : ''}
                                             ${tx.status === 'failed' ? 'bg-red-500/15 text-red-600 hover:bg-red-500/25 border-red-200' : ''}
                                         `}>
@@ -156,3 +156,4 @@ export function TransactionHistoryTable() {
         </Card>
     );
 }
+
