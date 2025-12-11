@@ -10,8 +10,13 @@ import { config } from '@/lib/wagmi';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: 'Arc Network',
-    description: 'Premium DeFi Lending & Borrowing',
+    title: "Nexux Lend - DeFi Lending Protocol",
+    description: "Supply, borrow, and earn with Arc Network's premier lending protocol",
+    icons: {
+        icon: '/favicon.ico',
+        apple: '/apple-touch-icon.png',
+        shortcut: '/icon-32x32.png',
+    },
 };
 
 export default async function RootLayout({

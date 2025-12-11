@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { ArrowUpRight, ArrowLeftRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HeroMetrics } from "@/components/dashboard/HeroMetrics";
@@ -22,6 +22,10 @@ import { CommandPalette } from '@/components/CommandPalette';
 import { useAccount, useReadContracts } from "wagmi";
 import { formatUnits } from "viem";
 import { USDC_ADDRESS, EURC_ADDRESS, USYC_ADDRESS, LENDING_POOL_ADDRESS, LENDING_POOL_ABI, ERC20_ABI } from "@/lib/contracts";
+import { parseBalances } from "@/lib/contractHelpers";
+import { calculateHealthFactor } from "@/lib/healthFactor";
+import { HeroMetricsSkeleton, AssetTableSkeleton } from "@/components/SkeletonLoaders";
+import { Header } from "@/components/Header";
 
 export default function DashboardPage() {
     const { t } = useLanguage();
@@ -56,18 +60,11 @@ export default function DashboardPage() {
         },
     });
 
-    // Parse balances
-    const usdcWalletBalance = results?.[0]?.result ? Number(formatUnits(results[0].result as bigint, 6)) : 0;
-    const eurcWalletBalance = results?.[1]?.result ? Number(formatUnits(results[1].result as bigint, 6)) : 0;
-    const usycWalletBalance = results?.[2]?.result ? Number(formatUnits(results[2].result as bigint, 6)) : 0;
-
-    const usdcSupplied = results?.[3]?.result ? Number(formatUnits(results[3].result as bigint, 6)) : 0;
-    const eurcSupplied = results?.[4]?.result ? Number(formatUnits(results[4].result as bigint, 6)) : 0;
-    const usycSupplied = results?.[5]?.result ? Number(formatUnits(results[5].result as bigint, 6)) : 0;
-
-    const usdcBorrowed = results?.[6]?.result ? Number(formatUnits(results[6].result as bigint, 6)) : 0;
-    const eurcBorrowed = results?.[7]?.result ? Number(formatUnits(results[7].result as bigint, 6)) : 0;
-    const usycBorrowed = results?.[8]?.result ? Number(formatUnits(results[8].result as bigint, 6)) : 0;
+    // Parse balances using helper
+    const balances = results ? parseBalances(results.slice(0, 9).map(r => r)) : [];
+    const [usdcWalletBalance, eurcWalletBalance, usycWalletBalance] = balances.slice(0, 3);
+    const [usdcSupplied, eurcSupplied, usycSupplied] = balances.slice(3, 6);
+    const [usdcBorrowed, eurcBorrowed, usycBorrowed] = balances.slice(6, 9);
 
     const eModeCategory = results?.[9]?.result ? Number(results[9].result) : 0;
 
@@ -76,13 +73,11 @@ export default function DashboardPage() {
     const totalBorrowed = usdcBorrowed + eurcBorrowed + usycBorrowed;
     const netWorth = totalSupplied - totalBorrowed;
 
-    // Calculate Health Factor
-    const healthFactor = useMemo(() => {
-        if (totalBorrowed === 0) return 999;
-        const ltv = eModeCategory === 1 ? 0.97 : 0.75;
-        const maxBorrow = totalSupplied * ltv;
-        return maxBorrow / totalBorrowed;
-    }, [totalSupplied, totalBorrowed, eModeCategory]);
+    // Calculate Health Factor using helper
+    const healthFactor = calculateHealthFactor(totalSupplied, totalBorrowed, eModeCategory);
+
+    // Loading state
+    const isLoading = !results && isConnected;
 
     const handleRefresh = () => {
         refetch();
@@ -176,74 +171,58 @@ export default function DashboardPage() {
     );
 
     return (
-        <div className="space-y-6">
-            {/* Header with Wallet Status */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <div>
-                        <h2 className="text-2xl font-bold tracking-tight">{t.dashboard.header.title}</h2>
-                        <p className="text-sm text-muted-foreground">{t.dashboard.header.subtitle}</p>
-                    </div>
-                    <WalletStatus />
-                </div>
-                <div className="flex items-center gap-2">
-                    <Button
-                        onClick={() => setIsBridgeModalOpen(true)}
-                        variant="outline"
-                        size="sm"
-                        className="gap-2"
-                    >
-                        <ArrowLeftRight className="h-4 w-4" />
-                        Bridge
-                    </Button>
-                    <button
-                        onClick={handleRefresh}
-                        disabled={isRefetching}
-                        className={`p-2 rounded-full hover:bg-muted transition-colors ${isRefetching ? 'animate-spin opacity-50' : ''}`}
-                        title="Refresh Data"
-                    >
-                        <ArrowUpRight className={`h-5 w-5 ${isRefetching ? '' : 'rotate-45'}`} />
-                    </button>
+        <>
+            {/* Header with Logo */}
+            <Header onBridgeClick={() => setIsBridgeModalOpen(true)} />
+
+            <div className="container mx-auto px-4 py-6 space-y-6">
+                {/* Loading State */}
+                {isLoading ? (
+                    <>
+                        <HeroMetricsSkeleton />
+                        <AssetTableSkeleton />
+                    </>
+                ) : (
+                    <>
+                        {/* Hero Metrics */}
+                        <HeroMetrics
+                            netWorth={netWorth}
+                            totalSupplied={totalSupplied}
+                            totalBorrowed={totalBorrowed}
+                            healthFactor={healthFactor}
+                            isConnected={isConnected}
+                        />
+
+                        {/* Tabbed Interface */}
+                        <DashboardTabs
+                            marketsContent={marketsContent}
+                            portfolioContent={portfolioContent}
+                            analyticsContent={analyticsContent}
+                        />
+                    </>
+                )}
+
+                {/* Bridge Modal */}
+                <BridgeModal
+                    isOpen={isBridgeModalOpen}
+                    onClose={() => setIsBridgeModalOpen(false)}
+                />
+
+                {/* Command Palette */}
+                <CommandPalette
+                    open={commandOpen}
+                    onOpenChange={setCommandOpen}
+                    onNavigate={(tab) => setActiveTab(tab as any)}
+                    onAction={(action) => {
+                        if (action === "bridge") setIsBridgeModalOpen(true);
+                    }}
+                />
+
+                {/* Keyboard Shortcut Hint */}
+                <div className="fixed bottom-4 right-4 text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-full shadow-lg">
+                    Press <kbd className="px-1.5 py-0.5 bg-background rounded border">⌘K</kbd> or <kbd className="px-1.5 py-0.5 bg-background rounded border">Ctrl+K</kbd> for commands
                 </div>
             </div>
-
-            {/* Hero Metrics */}
-            <HeroMetrics
-                netWorth={netWorth}
-                totalSupplied={totalSupplied}
-                totalBorrowed={totalBorrowed}
-                healthFactor={healthFactor}
-                isConnected={isConnected}
-            />
-
-            {/* Tabbed Interface */}
-            <DashboardTabs
-                marketsContent={marketsContent}
-                portfolioContent={portfolioContent}
-                analyticsContent={analyticsContent}
-            />
-
-            {/* Bridge Modal */}
-            <BridgeModal
-                isOpen={isBridgeModalOpen}
-                onClose={() => setIsBridgeModalOpen(false)}
-            />
-
-            {/* Command Palette */}
-            <CommandPalette
-                open={commandOpen}
-                onOpenChange={setCommandOpen}
-                onNavigate={(tab) => setActiveTab(tab as any)}
-                onAction={(action) => {
-                    if (action === "bridge") setIsBridgeModalOpen(true);
-                    // Add other actions as needed
-                }}
-            />
-
-            {/* Keyboard Shortcut Hint */}
-            <div className="fixed bottom-4 right-4 text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-full shadow-lg">
-                Press <kbd className="px-1.5 py-0.5 bg-background rounded border">⌘K</kbd> or <kbd className="px-1.5 py-0.5 bg-background rounded border">Ctrl+K</kbd> for commands
-            </div>
-        </div>
+        </>
     );
 }
