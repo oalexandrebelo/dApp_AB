@@ -1,4 +1,5 @@
 import { createWalletClient, custom } from 'viem';
+import { logger } from './logger';
 
 /**
  * Bridge Kit Integration for Arc Lending Protocol
@@ -49,8 +50,8 @@ export function initBridgeKit(walletClient: any) {
 
     return {
         bridge: async (params: BridgeParams): Promise<BridgeResult> => {
-            console.log('Bridge params:', params);
-
+            logger.log('Bridge params:', params);
+            logger.warn('Using mock Bridge Kit implementation. Uncomment real implementation in lib/bridgeKit.ts');
             // TODO: Replace with actual BridgeKit implementation
             // import { BridgeKit } from '@circle-fin/bridge-kit';
             // const kit = new BridgeKit({ adapter: { type: 'viem', client: walletClient } });
