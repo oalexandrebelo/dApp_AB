@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { useAssetDistribution } from "@/lib/useAssetDistribution";
 
 const COLORS = {
     USDC: "hsl(var(--info-500))",
@@ -10,13 +11,7 @@ const COLORS = {
 };
 
 export function AssetDistribution() {
-    // Mock data - replace with real data
-    const data = [
-        { name: "USDC", value: 1000, percentage: 45 },
-        { name: "EURC", value: 800, percentage: 36 },
-        { name: "USYC", value: 420, percentage: 19 },
-    ];
-
+    const data = useAssetDistribution();
     const totalValue = data.reduce((sum, item) => sum + item.value, 0);
 
     return (
@@ -54,18 +49,17 @@ export function AssetDistribution() {
 
                 <div className="mt-4 space-y-2">
                     {data.map((item) => (
-                        <div key={item.name} className="flex items-center justify-between text-sm">
+                        <div key={item.name} className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <div
                                     className="h-3 w-3 rounded-full"
                                     style={{ backgroundColor: COLORS[item.name as keyof typeof COLORS] }}
                                 />
-                                <span>{item.name}</span>
+                                <span className="text-sm">{item.name}</span>
                             </div>
-                            <div className="flex items-center gap-4">
-                                <span className="text-muted-foreground">{item.percentage}%</span>
-                                <span className="font-semibold">${item.value.toFixed(2)}</span>
-                            </div>
+                            <span className="text-sm font-semibold">
+                                ${item.value.toFixed(2)} ({totalValue > 0 ? Math.round((item.value / totalValue) * 100) : 0}%)
+                            </span>
                         </div>
                     ))}
                 </div>

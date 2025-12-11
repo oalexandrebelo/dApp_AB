@@ -3,31 +3,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useEarningsData } from "@/lib/useEarningsData";
 
 export function EarningsChart() {
     const [timeframe, setTimeframe] = useState<"24h" | "7d" | "30d">("7d");
-    const [data, setData] = useState<any[]>([]);
-
-    useEffect(() => {
-        // Mock data - replace with real data from contract
-        const mockData = {
-            "24h": Array.from({ length: 24 }, (_, i) => ({
-                time: `${i}:00`,
-                earnings: Math.random() * 10 + 50,
-            })),
-            "7d": Array.from({ length: 7 }, (_, i) => ({
-                time: `Day ${i + 1}`,
-                earnings: Math.random() * 50 + 200,
-            })),
-            "30d": Array.from({ length: 30 }, (_, i) => ({
-                time: `Day ${i + 1}`,
-                earnings: Math.random() * 100 + 500,
-            })),
-        };
-
-        setData(mockData[timeframe]);
-    }, [timeframe]);
+    const data = useEarningsData(timeframe);
 
     const totalEarnings = data.reduce((sum, item) => sum + item.earnings, 0);
 
@@ -42,8 +23,8 @@ export function EarningsChart() {
                                 key={tf}
                                 onClick={() => setTimeframe(tf)}
                                 className={`px-3 py-1 text-xs rounded-md transition-colors ${timeframe === tf
-                                        ? "bg-primary text-primary-foreground"
-                                        : "bg-muted hover:bg-muted/80"
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-muted hover:bg-muted/80"
                                     }`}
                             >
                                 {tf}

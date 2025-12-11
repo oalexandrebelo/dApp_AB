@@ -9,6 +9,7 @@ import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 import { useLanguage } from '@/lib/i18n';
 import { LanguageSwitcher } from '@/components/ui/LanguageSwitcher';
+import Image from 'next/image';
 
 export function HeroSection() {
     const router = useRouter();
@@ -65,10 +66,22 @@ export function HeroSection() {
                 animate="visible"
                 className="relative z-10 container px-4 md:px-6 flex flex-col items-center text-center space-y-8"
             >
+                {/* Logo */}
+                <motion.div variants={itemVariants} className="mb-6">
+                    <Image
+                        src="/logo-full.svg"
+                        alt="Nexux Lend"
+                        width={220}
+                        height={66}
+                        priority
+                        className="mx-auto"
+                    />
+                </motion.div>
+
                 <motion.div variants={itemVariants} className="space-y-4 max-w-3xl">
                     <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tighter text-black mb-6">
                         {t.landing.hero.title_start} <br />
-                        <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        <span className="bg-gradient-to-r from-[#7F201C] to-[#DEB918] bg-clip-text text-transparent">
                             {t.landing.hero.title_highlight}
                         </span>
                     </h1>
@@ -77,29 +90,20 @@ export function HeroSection() {
                     </p>
                 </motion.div>
 
-                <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
+                <motion.div variants={itemVariants} className="flex justify-center">
                     <Button
                         size="lg"
-                        variant="premium"
-                        className="text-base px-8 h-12"
+                        className="text-base px-8 h-12 bg-gradient-to-r from-[#7F201C] to-[#DEB918] text-white hover:opacity-90 transition-opacity shadow-lg"
                         onClick={handleLaunchApp}
                     >
                         {t.landing.hero.launch_app} <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                    <Button
-                        size="lg"
-                        variant="outline"
-                        className="text-base px-8 h-12 border-white/10 hover:bg-white/5"
-                        onClick={() => window.open('https://docs.arc.network', '_blank')}
-                    >
-                        {t.landing.hero.docs}
                     </Button>
                 </motion.div>
 
                 {/* Feature Cards */}
                 <motion.div
                     variants={itemVariants}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 text-left w-full max-w-5xl"
+                    className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12 md:mt-16 text-left w-full max-w-5xl"
                 >
                     <FeatureCard
                         icon={<Wallet className="h-8 w-8 text-purple-400" />}

@@ -125,7 +125,7 @@ const translations: Record<Language, Translations> = {
                 title_start: "The Future of",
                 title_highlight: "DeFi Lending",
                 subtitle: "Experience the next generation of cross-chain lending and borrowing using CCTP. Instant, secure, and purely decentralized.",
-                launch_app: "Launch App",
+                launch_app: "Launch dApp",
                 docs: "Documentation"
             },
             features: {
@@ -234,7 +234,7 @@ const translations: Record<Language, Translations> = {
                 title_start: "O Futuro do",
                 title_highlight: "Empréstimo DeFi",
                 subtitle: "Experimente a próxima geração de empréstimos cross-chain usando CCTP. Instantâneo, seguro e puramente descentralizado.",
-                launch_app: "Lançar App",
+                launch_app: "Lançar dApp",
                 docs: "Documentação"
             },
             features: {
@@ -343,7 +343,7 @@ const translations: Record<Language, Translations> = {
                 title_start: "El Futuro de",
                 title_highlight: "Préstamos DeFi",
                 subtitle: "Experimente la próxima generación de préstamos cross-chain usando CCTP. Instantáneo, seguro y puramente descentralizado.",
-                launch_app: "Lanzar App",
+                launch_app: "Lanzar dApp",
                 docs: "Documentación"
             },
             features: {

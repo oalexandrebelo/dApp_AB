@@ -229,11 +229,6 @@ export default function DashboardPage() {
                         if (action === "bridge") setIsBridgeModalOpen(true);
                     }}
                 />
-
-                {/* Keyboard Shortcut Hint */}
-                <div className="fixed bottom-4 right-4 text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-full shadow-lg">
-                    Press <kbd className="px-1.5 py-0.5 bg-background rounded border">⌘K</kbd> or <kbd className="px-1.5 py-0.5 bg-background rounded border">Ctrl+K</kbd> for commands
-                </div>
             </div>
         </>
     );

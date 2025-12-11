@@ -13,14 +13,14 @@ interface HeaderProps {
 export function Header({ onBridgeClick }: HeaderProps) {
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="container flex h-16 items-center justify-between px-4">
-                {/* Logo */}
+            <div className="container flex h-16 items-center px-4">
+                {/* Logo - Left */}
                 <Link href="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
                     {/* Desktop: Full logo */}
                     <Image
-                        src="/logo.svg"
+                        src="/logo-abr.svg"
                         alt="Nexux Lend"
-                        width={140}
+                        width={100}
                         height={40}
                         className="hidden md:block"
                         priority
@@ -36,29 +36,10 @@ export function Header({ onBridgeClick }: HeaderProps) {
                     />
                 </Link>
 
-                {/* Navigation - Desktop */}
-                <nav className="hidden md:flex items-center gap-6">
-                    <Link
-                        href="/dashboard"
-                        className="text-sm font-medium hover:text-primary transition-colors"
-                    >
-                        Dashboard
-                    </Link>
-                    {onBridgeClick && (
-                        <Button
-                            onClick={onBridgeClick}
-                            variant="ghost"
-                            size="sm"
-                            className="gap-2"
-                        >
-                            <ArrowLeftRight className="h-4 w-4" />
-                            Bridge
-                        </Button>
-                    )}
-                </nav>
-
-                {/* Wallet Status */}
-                <WalletStatus />
+                {/* Wallet Status - Right */}
+                <div className="ml-auto">
+                    <WalletStatus />
+                </div>
             </div>
         </header>
     );

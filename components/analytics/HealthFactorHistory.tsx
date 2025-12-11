@@ -3,20 +3,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
 import { AlertTriangle, CheckCircle2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useHealthFactorHistory } from "@/lib/useHealthFactorHistory";
 
 export function HealthFactorHistory() {
-    const [data, setData] = useState<any[]>([]);
-
-    useEffect(() => {
-        // Mock data - replace with real historical data
-        const mockData = Array.from({ length: 30 }, (_, i) => ({
-            day: `Day ${i + 1}`,
-            healthFactor: Math.random() * 3 + 1.5, // Random between 1.5 and 4.5
-        }));
-
-        setData(mockData);
-    }, []);
+    const data = useHealthFactorHistory();
 
     const currentHF = data[data.length - 1]?.healthFactor || 0;
     const status = currentHF >= 2 ? "safe" : currentHF >= 1.2 ? "moderate" : "risk";
@@ -33,8 +23,8 @@ export function HealthFactorHistory() {
                             <AlertTriangle className="h-5 w-5 text-warning-500" />
                         )}
                         <span className={`text-sm font-semibold ${status === "safe" ? "text-success-500" :
-                                status === "moderate" ? "text-warning-500" :
-                                    "text-error-500"
+                            status === "moderate" ? "text-warning-500" :
+                                "text-error-500"
                             }`}>
                             {status.toUpperCase()}
                         </span>
@@ -46,8 +36,8 @@ export function HealthFactorHistory() {
                     <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">Current Health Factor</span>
                         <span className={`text-2xl font-bold ${status === "safe" ? "text-success-500" :
-                                status === "moderate" ? "text-warning-500" :
-                                    "text-error-500"
+                            status === "moderate" ? "text-warning-500" :
+                                "text-error-500"
                             }`}>
                             {currentHF.toFixed(2)}
                         </span>
@@ -80,11 +70,11 @@ export function HealthFactorHistory() {
                             }}
                         />
                         {/* Danger zone */}
-                        <ReferenceLine y={1} stroke="hsl(var(--error-500))" strokeDasharray="3 3" label="Liquidation" />
+                        <ReferenceLine y={1} stroke="hsl(var(--error-500))" strokeDasharray="3 3" />
                         {/* Warning zone */}
-                        <ReferenceLine y={1.2} stroke="hsl(var(--warning-500))" strokeDasharray="3 3" label="Warning" />
+                        <ReferenceLine y={1.2} stroke="hsl(var(--warning-500))" strokeDasharray="3 3" />
                         {/* Safe zone */}
-                        <ReferenceLine y={2} stroke="hsl(var(--success-500))" strokeDasharray="3 3" label="Safe" />
+                        <ReferenceLine y={2} stroke="hsl(var(--success-500))" strokeDasharray="3 3" />
 
                         <Line
                             type="monotone"

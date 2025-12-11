@@ -67,11 +67,7 @@ export function HeroMetrics({
                 <Card className="hover:shadow-elevation-2 transition-shadow">
                     <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
-                            <p className="text-xs text-muted-foreground">Total Supplied</p>
-                            <div className="flex items-center gap-1">
-                                <TrendingUp className="h-4 w-4 text-success-500" />
-                                <span className="text-lg">📈</span>
-                            </div>
+                            <p className="text-xs text-muted-foreground">📈 Total Supplied</p>
                         </div>
                         <p className="text-3xl font-bold text-success-500">
                             ${totalSupplied.toFixed(2)}
@@ -83,14 +79,10 @@ export function HeroMetrics({
                 </Card>
 
                 {/* Total Borrowed */}
-                <Card className="hover:shadow-elevation-2 transition-shadow">
-                    <CardContent className="p-4">
+                <Card className="p-4 hover:shadow-elevation-2 transition-shadow">
+                    <CardContent className="p-0">
                         <div className="flex items-center justify-between mb-2">
-                            <p className="text-xs text-muted-foreground">Total Borrowed</p>
-                            <div className="flex items-center gap-1">
-                                <TrendingDown className="h-4 w-4 text-error-500" />
-                                <span className="text-lg">📉</span>
-                            </div>
+                            <p className="text-xs text-muted-foreground">📉 Total Borrowed</p>
                         </div>
                         <p className="text-3xl font-bold text-error-500">
                             ${totalBorrowed.toFixed(2)}
