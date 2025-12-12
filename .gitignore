@@ -31,8 +31,8 @@ ts-debug.log*
 
 # vercel
 .vercel
-# Internal docs
+# Internal docs (except PRD and FLOWCHART)
 .antigravityignore
+.antiignore
 docs/MANUAL*.md
-docs/PRD.md
 docs/*.zip
