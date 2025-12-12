@@ -31,3 +31,8 @@ ts-debug.log*
 
 # vercel
 .vercel
+# Internal docs
+.antigravityignore
+docs/MANUAL*.md
+docs/PRD.md
+docs/*.zip
