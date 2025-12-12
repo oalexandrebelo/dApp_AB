@@ -20,10 +20,10 @@ export function useEarningsData(timeframe: '24h' | '7d' | '30d') {
             { address: LENDING_POOL_ADDRESS, abi: LENDING_POOL_ABI, functionName: 'getUserBalance', args: [address!, USDC_ADDRESS] },
             { address: LENDING_POOL_ADDRESS, abi: LENDING_POOL_ABI, functionName: 'getUserBalance', args: [address!, EURC_ADDRESS] },
             { address: LENDING_POOL_ADDRESS, abi: LENDING_POOL_ABI, functionName: 'getUserBalance', args: [address!, USYC_ADDRESS] },
-            // Get APY rates
-            { address: LENDING_POOL_ADDRESS, abi: LENDING_POOL_ABI, functionName: 'getSupplyAPY', args: [USDC_ADDRESS] },
-            { address: LENDING_POOL_ADDRESS, abi: LENDING_POOL_ABI, functionName: 'getSupplyAPY', args: [EURC_ADDRESS] },
-            { address: LENDING_POOL_ADDRESS, abi: LENDING_POOL_ABI, functionName: 'getSupplyAPY', args: [USYC_ADDRESS] },
+            // Get supply rates (APY)
+            { address: LENDING_POOL_ADDRESS, abi: LENDING_POOL_ABI, functionName: 'getSupplyRate', args: [USDC_ADDRESS] },
+            { address: LENDING_POOL_ADDRESS, abi: LENDING_POOL_ABI, functionName: 'getSupplyRate', args: [EURC_ADDRESS] },
+            { address: LENDING_POOL_ADDRESS, abi: LENDING_POOL_ABI, functionName: 'getSupplyRate', args: [USYC_ADDRESS] },
         ],
     });
 
