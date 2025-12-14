@@ -1,18 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { fetchHistoricalTVL, fetchProtocolVolume, TVLData, VolumeData } from "@/lib/api";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import { useLanguage } from '@/lib/i18n';
 
 export default function AnalyticsPage() {
     const [tvlData, setTvlData] = useState<TVLData[]>([]);
     const [volumeData, setVolumeData] = useState<VolumeData[]>([]);
     const [loading, setLoading] = useState(true);
-
     const { t } = useLanguage();
+    const router = useRouter();
 
     useEffect(() => {
         const loadData = async () => {
@@ -34,6 +36,17 @@ export default function AnalyticsPage() {
 
     return (
         <div className="space-y-8">
+            <div className="flex items-center gap-4">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => router.push('/dashboard')}
+                    className="gap-2"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back to Dashboard
+                </Button>
+            </div>
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">{t.dashboard.analytics_page.title}</h1>
                 <p className="text-muted-foreground">{t.dashboard.analytics_page.subtitle}</p>

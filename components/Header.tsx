@@ -42,35 +42,17 @@ export function Header({ onBridgeClick }: HeaderProps) {
                                 className="hidden md:block"
                                 priority
                             />
-                            {/* Mobile: Icon only */}
+                            {/* Mobile: Same logo, smaller */}
                             <Image
-                                src="/logo-icon.svg"
+                                src="/logo-abr.svg"
                                 alt="Nexux"
-                                width={32}
-                                height={32}
+                                width={60}
+                                height={38}
                                 className="md:hidden"
                                 priority
                             />
                         </Link>
                     )}
-
-                    {/* Desktop Navigation - Hidden for now, can add later */}
-                    <nav className="hidden lg:flex items-center gap-6 ml-8">
-                        {isConnected && navLinks.map((link) => (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                className={cn(
-                                    "text-sm font-medium transition-colors hover:text-primary",
-                                    pathname === link.href
-                                        ? "text-foreground"
-                                        : "text-muted-foreground"
-                                )}
-                            >
-                                {link.label}
-                            </Link>
-                        ))}
-                    </nav>
 
                     {/* Right Side */}
                     <div className="ml-auto flex items-center gap-4">

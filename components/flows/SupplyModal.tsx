@@ -6,9 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useWriteContract, useWaitForTransactionReceipt, useAccount } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt, useAccount, useReadContract } from "wagmi";
 import { LENDING_POOL_ADDRESS, LENDING_POOL_ABI, ERC20_ABI } from "@/lib/contracts";
 import { useLanguage } from '@/lib/i18n';
+import { formatUnits } from "viem";
+import { useSettings } from "@/hooks/useSettings";
+import { useToast } from "@/hooks/use-toast";
 
 import { saveTransaction } from "@/lib/history";
 
@@ -27,9 +30,26 @@ interface SupplyModalProps {
 export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
     const { t } = useLanguage();
     const { address, isConnected } = useAccount();
+    const { settings } = useSettings();
+    const { toast } = useToast();
     const [amount, setAmount] = useState("");
     const [step, setStep] = useState<"input" | "review" | "approving" | "approved_waiting" | "supplying" | "success">("input");
-    const [slippage, setSlippage] = useState("0.5");
+
+    // Fetch real wallet balance
+    const { data: walletBalanceData } = useReadContract({
+        address: asset.address,
+        abi: ERC20_ABI,
+        functionName: 'balanceOf',
+        args: [address!],
+        query: {
+            enabled: !!address && isConnected,
+            refetchInterval: 5000
+        }
+    });
+
+    const walletBalance = walletBalanceData
+        ? formatUnits(walletBalanceData as bigint, asset.decimals)
+        : "0";
 
     const { data: hash, writeContract, isPending, error } = useWriteContract();
     const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -52,6 +72,11 @@ export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
 
     const handleSupply = () => {
         setStep("supplying");
+
+        // Apply slippage protection (for future DEX integration)
+        const slippageTolerance = parseFloat(settings.slippage) / 100;
+        const minAmount = parseFloat(amount) * (1 - slippageTolerance);
+
         writeContract({
             address: LENDING_POOL_ADDRESS,
             abi: LENDING_POOL_ABI,
@@ -59,7 +84,7 @@ export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
             args: [
                 asset.address,
                 BigInt(parseFloat(amount) * Math.pow(10, asset.decimals) || 0),
-                address!, // Use actual user address
+                address!,
                 0
             ],
         });
@@ -74,7 +99,15 @@ export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
     useEffect(() => {
         if (isConfirmed) {
             if (step === "approving") {
-                setStep("approved_waiting"); // Move to intermediate step
+                setStep("approved_waiting");
+
+                // Show approval confirmation if enabled
+                if (settings.txNotifications) {
+                    toast({
+                        title: "✅ Approval Confirmed",
+                        description: `${asset.symbol} approved for supply`,
+                    });
+                }
             } else if (step === "supplying") {
                 setStep("success");
 
@@ -90,9 +123,18 @@ export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
                         user: address
                     });
                 }
+
+                // Show supply confirmation if enabled
+                if (settings.txNotifications) {
+                    toast({
+                        title: "✅ Supply Successful",
+                        description: `Supplied ${amount} ${asset.symbol}`,
+                        duration: 5000,
+                    });
+                }
             }
         }
-    }, [isConfirmed, step, hash, amount, asset.symbol, address]);
+    }, [isConfirmed, step, hash, amount, asset.symbol, address, settings.txNotifications, toast]);
 
     return (
         <Modal isOpen={isOpen} onClose={reset} title={`${t.modals.supply.title}: ${asset?.symbol}`}>
@@ -109,7 +151,7 @@ export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
                             <div className="bg-secondary/30 p-4 rounded-xl space-y-2">
                                 <div className="flex justify-between text-sm text-muted-foreground">
                                     <span>{t.modals.supply.amount_label}</span>
-                                    <span>Balance: {asset.balance}</span>
+                                    <span>Balance: {parseFloat(walletBalance).toFixed(2)}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Input
@@ -122,7 +164,7 @@ export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
                                     <Button
                                         size="sm"
                                         variant="ghost"
-                                        onClick={() => setAmount(asset.balance.replace(/,/g, ''))}
+                                        onClick={() => setAmount(walletBalance)}
                                         className="text-xs text-indigo-400 hover:text-indigo-300"
                                     >
                                         MAX
@@ -131,8 +173,7 @@ export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
                             </div>
 
                             <Button
-                                className="w-full"
-                                variant="premium"
+                                className="w-full bg-[#5D9CDB] hover:bg-[#4a8ac9] text-white"
                                 size="lg"
                                 onClick={handleReview}
                                 disabled={!amount || parseFloat(amount) <= 0}
@@ -171,15 +212,7 @@ export function SupplyModal({ isOpen, onClose, asset }: SupplyModalProps) {
                                 <div className="h-px bg-white/5 my-2" />
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-muted-foreground">Max Slippage</span>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-xs text-muted-foreground">Tolerance:</span>
-                                        <Input
-                                            value={slippage}
-                                            onChange={(e) => setSlippage(e.target.value)}
-                                            className="w-16 h-6 text-right text-xs bg-black/20 border-none"
-                                        />
-                                        <span className="text-xs">%</span>
-                                    </div>
+                                    <span className="text-xs">{settings.slippage}%</span>
                                 </div>
                             </div>
 

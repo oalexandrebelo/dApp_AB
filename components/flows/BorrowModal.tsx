@@ -6,10 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useWriteContract, useWaitForTransactionReceipt, useAccount } from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt, useAccount, useReadContract } from "wagmi";
 import { LENDING_POOL_ADDRESS, LENDING_POOL_ABI } from "@/lib/contracts";
 import { useLanguage } from '@/lib/i18n';
 import { saveTransaction } from "@/lib/history";
+import { formatUnits } from "viem";
+import { useSettings } from "@/hooks/useSettings";
+import { useToast } from "@/hooks/use-toast";
 
 interface BorrowModalProps {
     isOpen: boolean;
@@ -26,8 +29,27 @@ interface BorrowModalProps {
 export function BorrowModal({ isOpen, onClose, asset }: BorrowModalProps) {
     const { t } = useLanguage();
     const { address, isConnected } = useAccount();
+    const { settings } = useSettings();
+    const { toast } = useToast();
     const [amount, setAmount] = useState("");
     const [step, setStep] = useState<"input" | "confirming" | "success">("input");
+
+    // Fetch user account data to calculate max borrow
+    const { data: accountData } = useReadContract({
+        address: LENDING_POOL_ADDRESS,
+        abi: LENDING_POOL_ABI,
+        functionName: 'getUserAccountData',
+        args: [address!],
+        query: {
+            enabled: !!address && isConnected,
+            refetchInterval: 5000
+        }
+    });
+
+    // Calculate max borrow amount from availableBorrowsUSD
+    const maxBorrowAmount = accountData
+        ? formatUnits(accountData[2] as bigint, 8)
+        : "0";
 
     const { data: hash, writeContract, isPending } = useWriteContract();
     const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -38,7 +60,7 @@ export function BorrowModal({ isOpen, onClose, asset }: BorrowModalProps) {
         if (isConfirmed && hash && address) {
             setStep("success");
 
-            // Save to History via helper
+            // Save to History
             saveTransaction({
                 hash: hash,
                 type: 'borrow',
@@ -48,8 +70,17 @@ export function BorrowModal({ isOpen, onClose, asset }: BorrowModalProps) {
                 to: address,
                 user: address
             });
+
+            // Show confirmation if enabled
+            if (settings.txNotifications) {
+                toast({
+                    title: "✅ Borrow Successful",
+                    description: `Borrowed ${amount} ${asset.symbol}`,
+                    duration: 5000,
+                });
+            }
         }
-    }, [isConfirmed, hash, amount, asset.symbol, address]);
+    }, [isConfirmed, hash, amount, asset.symbol, address, settings.txNotifications, toast]);
 
     const handleBorrow = async () => {
         setStep("confirming");
@@ -88,7 +119,7 @@ export function BorrowModal({ isOpen, onClose, asset }: BorrowModalProps) {
                             <div className="bg-secondary/30 p-4 rounded-xl space-y-2">
                                 <div className="flex justify-between text-sm text-muted-foreground">
                                     <span>{t.modals.borrow.amount_label}</span>
-                                    <span>Available: 1,500.00</span>
+                                    <span>Available: {parseFloat(maxBorrowAmount).toFixed(2)}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Input
@@ -101,7 +132,7 @@ export function BorrowModal({ isOpen, onClose, asset }: BorrowModalProps) {
                                     <Button
                                         size="sm"
                                         variant="ghost"
-                                        onClick={() => setAmount("1500.00")}
+                                        onClick={() => setAmount(maxBorrowAmount)}
                                         className="text-xs text-indigo-400 hover:text-indigo-300"
                                     >
                                         MAX
@@ -122,8 +153,7 @@ export function BorrowModal({ isOpen, onClose, asset }: BorrowModalProps) {
                             </div>
 
                             <Button
-                                className="w-full"
-                                variant="premium"
+                                className="w-full bg-[#5D9CDB] hover:bg-[#4a8ac9] text-white"
                                 size="lg"
                                 onClick={handleBorrow}
                                 disabled={!amount || parseFloat(amount) <= 0}

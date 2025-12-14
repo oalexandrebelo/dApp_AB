@@ -183,6 +183,22 @@ export const LENDING_POOL_ABI = [
     },
     {
         inputs: [
+            { name: "user", type: "address" }
+        ],
+        name: "getUserAccountData",
+        outputs: [
+            { name: "totalCollateralUSD", type: "uint256" },
+            { name: "totalDebtUSD", type: "uint256" },
+            { name: "availableBorrowsUSD", type: "uint256" },
+            { name: "currentLiquidationThreshold", type: "uint256" },
+            { name: "ltv", type: "uint256" },
+            { name: "healthFactor", type: "uint256" }
+        ],
+        stateMutability: "view",
+        type: "function",
+    },
+    {
+        inputs: [
             { name: "collateralAsset", type: "address" },
             { name: "debtAsset", type: "address" },
             { name: "user", type: "address" },

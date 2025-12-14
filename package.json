@@ -1,6 +1,8 @@
 {
-    "name": "arc-network",
-    "version": "0.1.0",
+    "name": "nexux-lend",
+    "version": "1.0.0",
+    "description": "Decentralized lending protocol on Arc Network with cross-chain bridge support via Circle CCTP",
+    "author": "Alexandre Belo (www.alexandrebelo.com.br)",
     "private": true,
     "scripts": {
         "dev": "next dev --webpack",

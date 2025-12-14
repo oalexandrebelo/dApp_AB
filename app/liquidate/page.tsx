@@ -1,16 +1,32 @@
 "use client";
 
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Info, TrendingUp, DollarSign, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Info, TrendingUp, DollarSign, Users, ArrowLeft } from "lucide-react";
 import { LiquidatablePositionsTable } from "@/components/liquidator/LiquidatablePositionsTable";
 import { useLiquidatablePositions } from "@/lib/useLiquidatablePositions";
 
 export default function LiquidatorDashboard() {
     const { positions, stats, isLoading } = useLiquidatablePositions();
+    const router = useRouter();
 
     return (
         <div className="container mx-auto p-6 space-y-6">
+            {/* Back Button */}
+            <div className="flex items-center gap-4">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => router.push('/dashboard')}
+                    className="gap-2"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back to Dashboard
+                </Button>
+            </div>
+
             {/* Header */}
             <div>
                 <h1 className="text-3xl font-bold tracking-tight mb-2">Liquidator Dashboard</h1>

@@ -29,6 +29,7 @@ import { Header } from "@/components/Header";
 import { EarningsChart } from "@/components/analytics/EarningsChart";
 import { AssetDistribution } from "@/components/analytics/AssetDistribution";
 import { HealthFactorHistory } from "@/components/analytics/HealthFactorHistory";
+import { useLiquidationMonitor } from "@/hooks/useLiquidationMonitor";
 
 export default function DashboardPage() {
     const { t } = useLanguage();
@@ -78,6 +79,9 @@ export default function DashboardPage() {
 
     // Calculate Health Factor using helper
     const healthFactor = calculateHealthFactor(totalSupplied, totalBorrowed, eModeCategory);
+
+    // Monitor liquidation risk
+    useLiquidationMonitor({ healthFactor, totalSupplied, totalBorrowed });
 
     // Loading state
     const isLoading = !results && isConnected;
@@ -136,7 +140,7 @@ export default function DashboardPage() {
                         suppliedUSYC={usycSupplied}
                     />
                 ) : (
-                    <EmptyState type="supply" onAction={handleGoToMarkets} />
+                    <EmptyState type="supply" />
                 )}
             </div>
 
@@ -150,7 +154,7 @@ export default function DashboardPage() {
                         borrowedUSYC={usycBorrowed}
                     />
                 ) : (
-                    <EmptyState type="borrow" onAction={handleGoToMarkets} />
+                    <EmptyState type="borrow" />
                 )}
             </div>
         </div>

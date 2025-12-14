@@ -1,15 +1,17 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRouter } from 'next/navigation';
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Package } from "lucide-react";
 
 interface EmptyStateProps {
     type: "supply" | "borrow";
-    onAction: () => void;
 }
 
-export function EmptyState({ type, onAction }: EmptyStateProps) {
+export function EmptyState({ type }: EmptyStateProps) {
+    const router = useRouter();
+
     const content = {
         supply: {
             icon: TrendingUp,
@@ -17,6 +19,7 @@ export function EmptyState({ type, onAction }: EmptyStateProps) {
             description: "Supply assets to start earning yield on your crypto holdings.",
             action: "Go to Markets",
             color: "text-success-500",
+            route: "/dashboard/supply",
         },
         borrow: {
             icon: Package,
@@ -24,10 +27,11 @@ export function EmptyState({ type, onAction }: EmptyStateProps) {
             description: "Borrow assets against your collateral to access liquidity.",
             action: "Go to Markets",
             color: "text-blue-500",
+            route: "/dashboard/borrow",
         },
     };
 
-    const { icon: Icon, title, description, action, color } = content[type];
+    const { icon: Icon, title, description, action, color, route } = content[type];
 
     return (
         <Card className="border-dashed">
@@ -39,7 +43,7 @@ export function EmptyState({ type, onAction }: EmptyStateProps) {
                 <p className="text-sm text-muted-foreground text-center max-w-md mb-6">
                     {description}
                 </p>
-                <Button onClick={onAction} size="lg">
+                <Button onClick={() => router.push(route)} size="lg">
                     {action}
                 </Button>
             </CardContent>
