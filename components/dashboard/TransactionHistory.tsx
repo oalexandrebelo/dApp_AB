@@ -4,9 +4,11 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useAccount } from "wagmi";
 import { ArrowUpRight, ArrowDownRight, ArrowLeftRight, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { BridgeModal } from "@/components/bridge/BridgeModal";
 
 interface Transaction {
     hash: string;
@@ -39,6 +41,7 @@ export function addTransaction(address: string, tx: Transaction) {
 export function TransactionHistory() {
     const { address } = useAccount();
     const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [isBridgeModalOpen, setIsBridgeModalOpen] = useState(false);
 
     useEffect(() => {
         const loadTransactions = () => {
@@ -115,81 +118,113 @@ export function TransactionHistory() {
 
     if (transactions.length === 0) {
         return (
-            <Card>
-                <CardHeader>
-                    <CardTitle>Transaction History</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground text-center py-8">
-                        No transactions yet
-                    </p>
-                </CardContent>
-            </Card>
+            <>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                        <CardTitle>Transaction History</CardTitle>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIsBridgeModalOpen(true)}
+                            className="gap-2"
+                        >
+                            <ArrowLeftRight className="h-4 w-4" />
+                            <span className="hidden sm:inline">Bridge</span>
+                        </Button>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground text-center py-8">
+                            No transactions yet
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <BridgeModal
+                    isOpen={isBridgeModalOpen}
+                    onClose={() => setIsBridgeModalOpen(false)}
+                />
+            </>
         );
     }
 
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Transaction History</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="overflow-x-auto">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Type</TableHead>
-                                <TableHead>Asset</TableHead>
-                                <TableHead>Amount</TableHead>
-                                <TableHead>Time</TableHead>
-                                <TableHead>Tx</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {transactions.map((tx) => (
-                                <TableRow key={tx.hash}>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2">
-                                            {getTypeIcon(tx.type)}
-                                            <Badge variant={getTypeBadgeVariant(tx.type)}>
-                                                <span className="capitalize">
-                                                    {tx.type === 'supply' ? 'Supply' :
-                                                        tx.type === 'borrow' ? 'Borrow' :
-                                                            tx.type === 'withdraw' ? 'Withdraw' :
-                                                                tx.type === 'repay' ? 'Repay' :
-                                                                    tx.type}
-                                                </span>
-                                            </Badge>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-2 font-medium">
-                                            {tx.asset}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="font-mono">
-                                        {tx.amount}
-                                    </TableCell>
-                                    <TableCell className="text-sm text-muted-foreground">
-                                        {formatDistanceToNow(tx.timestamp, { addSuffix: true })}
-                                    </TableCell>
-                                    <TableCell>
-                                        <a
-                                            href={`https://testnet.arcscan.net/tx/${tx.hash}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-xs text-blue-500 hover:text-blue-600 hover:underline"
-                                        >
-                                            {tx.hash.slice(0, 6)}...{tx.hash.slice(-4)}
-                                        </a>
-                                    </TableCell>
+        <>
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                    <CardTitle>Transaction History</CardTitle>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsBridgeModalOpen(true)}
+                        className="gap-2"
+                    >
+                        <ArrowLeftRight className="h-4 w-4" />
+                        <span className="hidden sm:inline">Bridge</span>
+                    </Button>
+                </CardHeader>
+                <CardContent>
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Asset</TableHead>
+                                    <TableHead>Amount</TableHead>
+                                    <TableHead>Time</TableHead>
+                                    <TableHead>Tx</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
-            </CardContent>
-        </Card>
+                            </TableHeader>
+                            <TableBody>
+                                {transactions.map((tx) => (
+                                    <TableRow key={tx.hash}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                {getTypeIcon(tx.type)}
+                                                <Badge variant={getTypeBadgeVariant(tx.type)}>
+                                                    <span className="capitalize">
+                                                        {tx.type === 'supply' ? 'Supply' :
+                                                            tx.type === 'borrow' ? 'Borrow' :
+                                                                tx.type === 'withdraw' ? 'Withdraw' :
+                                                                    tx.type === 'repay' ? 'Repay' :
+                                                                        tx.type}
+                                                    </span>
+                                                </Badge>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2 font-medium">
+                                                {tx.asset}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="font-mono">
+                                            {tx.amount}
+                                        </TableCell>
+                                        <TableCell className="text-sm text-muted-foreground">
+                                            {formatDistanceToNow(tx.timestamp, { addSuffix: true })}
+                                        </TableCell>
+                                        <TableCell>
+                                            <a
+                                                href={`https://testnet.arcscan.net/tx/${tx.hash}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-xs text-blue-500 hover:text-blue-600 hover:underline"
+                                            >
+                                                {tx.hash.slice(0, 6)}...{tx.hash.slice(-4)}
+                                            </a>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <BridgeModal
+                isOpen={isBridgeModalOpen}
+                onClose={() => setIsBridgeModalOpen(false)}
+            />
+        </>
     );
 }
 

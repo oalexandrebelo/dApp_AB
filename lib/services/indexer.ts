@@ -9,8 +9,6 @@ export class IndexerService {
      * Process a 'Supply' event from the LendingPool contract
      */
     async processSupplyEvent(userAddress: string, assetAddress: string, amount: string, txHash: string) {
-        console.log(`[Indexer] Processing Supply: ${userAddress} supplied ${amount} of ${assetAddress}`);
-
         // 1. Find or Create User
         const user = await prisma.user.upsert({
             where: { address: userAddress },
@@ -42,8 +40,6 @@ export class IndexerService {
      * Process a 'Borrow' event
      */
     async processBorrowEvent(userAddress: string, assetAddress: string, amount: string, txHash: string) {
-        console.log(`[Indexer] Processing Borrow: ${userAddress} borrowed ${amount}`);
-
         // Database updates similar to Supply...
     }
 }

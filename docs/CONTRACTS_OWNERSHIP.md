@@ -74,22 +74,7 @@
 
 **Purpose:** Bridge entre chains
 
----
 
-## 🔑 CHAVE PRIVADA
-
-**Localização:** Variável de ambiente `PRIVATE_KEY` no Git Bash
-**Formato:** Exportada como `export PRIVATE_KEY=0x...`
-
-**⚠️ IMPORTANTE:**
-- Nunca commitar a chave privada
-- Está apenas no ambiente local do Git Bash
-- Não está no código ou no repositório
-
-**Para verificar (Git Bash):**
-```bash
-echo $PRIVATE_KEY
-```
 
 ---
 
@@ -178,5 +163,3 @@ echo $PRIVATE_KEY
 
 ---
 
-**Status:** ✅ Todos os contratos deployados e funcionais
-**Próximo:** Testar features no frontend

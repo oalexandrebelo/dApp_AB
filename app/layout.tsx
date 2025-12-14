@@ -12,10 +12,23 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
     title: "Nexux Lend - DeFi Lending Protocol",
     description: "Supply, borrow, and earn with Nexux Lend - Premier DeFi lending protocol",
+    manifest: '/manifest.json',
+    themeColor: '#7F201C',
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: 'black-translucent',
+        title: 'Nexux Lend',
+    },
     icons: {
         icon: '/favicon.ico',
         apple: '/apple-touch-icon.png',
         shortcut: '/icon-32x32.png',
+    },
+    viewport: {
+        width: 'device-width',
+        initialScale: 1,
+        maximumScale: 1,
+        userScalable: false,
     },
 };
 

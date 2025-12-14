@@ -1,3 +1,13 @@
+import withPWA from 'next-pwa';
+
+const pwaConfig = withPWA({
+    dest: 'public',
+    register: true,
+    skipWaiting: true,
+    disable: process.env.NODE_ENV === 'development',
+    buildExcludes: [/middleware-manifest\.json$/],
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     transpilePackages: ['@walletconnect/ethereum-provider', '@wagmi/connectors', 'wagmi', '@rainbow-me/rainbowkit'],
@@ -29,4 +39,5 @@ const nextConfig = {
     },
 };
 
-export default nextConfig;
+export default pwaConfig(nextConfig);
+

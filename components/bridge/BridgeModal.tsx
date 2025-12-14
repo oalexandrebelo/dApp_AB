@@ -52,25 +52,17 @@ export function BridgeModal({ isOpen, onClose, autoSupply = true }: BridgeModalP
             const kit = initBridgeKit(walletClient);
 
             const result = await kit.bridge({
-                from: {
-                    adapter: walletClient,
-                    chain: fromChain,
-                },
-                to: {
-                    adapter: walletClient,
-                    chain: toChain,
-                },
-                amount: amount,
-                fee: {
-                    amount: fee,
-                    recipient: FEE_RECIPIENT_ADDRESS,
-                }
+                from: { adapter: walletClient, chain: fromChain },
+                to: { adapter: walletClient, chain: toChain },
+                amount: amount
             });
 
             setBridgeHash(result.transactionHash);
 
             // Aguardar conclusão do bridge
-            await result.wait();
+            if (result.wait) {
+                await result.wait();
+            }
 
             // Se auto-supply está ativado e destino é Arc, fazer supply
             if (autoSupply && toChain === "arc") {
