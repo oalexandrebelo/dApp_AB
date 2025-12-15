@@ -4,6 +4,10 @@
     "description": "Decentralized lending protocol on Arc Network with cross-chain bridge support via Circle CCTP",
     "author": "Alexandre Belo (www.alexandrebelo.com.br)",
     "private": true,
+    "engines": {
+        "node": ">=20.9.0",
+        "npm": ">=9.0.0"
+    },
     "scripts": {
         "dev": "next dev --webpack",
         "build": "next build --webpack",
