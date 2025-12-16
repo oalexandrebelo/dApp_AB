@@ -63,6 +63,7 @@ export async function executeCCTPBridge({
             abi: ERC20_ABI,
             functionName: 'approve',
             args: [fromConfig.tokenMessenger, amountInUnits],
+            chain: { id: fromChainId } as any,
         });
 
         logger.log('[CCTP] Approval transaction:', approveHash);
@@ -89,6 +90,7 @@ export async function executeCCTPBridge({
                 mintRecipient,
                 fromConfig.usdc,
             ],
+            chain: { id: fromChainId } as any,
         });
 
         logger.log('[CCTP] Burn transaction:', burnHash);
@@ -225,6 +227,7 @@ export async function completeCCTPBridge({
             abi: MESSAGE_TRANSMITTER_ABI,
             functionName: 'receiveMessage',
             args: [message as `0x${string}`, attestation as `0x${string}`],
+            chain: { id: chainId } as any,
         });
 
         logger.log('[CCTP] Mint transaction:', mintHash);
