@@ -51,6 +51,12 @@ export async function executeCCTPBridge({
     const amountInUnits = parseUnits(amount, 6); // USDC has 6 decimals
 
     try {
+        // Get account from wallet client
+        const account = walletClient.account;
+        if (!account) {
+            throw new Error('Wallet account not found');
+        }
+
         // Step 1: Approve USDC
         logger.log('[CCTP] Step 1: Approving USDC...');
         onProgress?.({
@@ -59,6 +65,7 @@ export async function executeCCTPBridge({
         });
 
         const approveHash = await walletClient.writeContract({
+            account,
             address: fromConfig.usdc,
             abi: ERC20_ABI,
             functionName: 'approve',
@@ -81,6 +88,7 @@ export async function executeCCTPBridge({
         const mintRecipient = `0x${recipientAddress.slice(2).padStart(64, '0')}` as `0x${string}`;
 
         const burnHash = await walletClient.writeContract({
+            account,
             address: fromConfig.tokenMessenger,
             abi: TOKEN_MESSENGER_ABI,
             functionName: 'depositForBurn',
@@ -216,6 +224,12 @@ export async function completeCCTPBridge({
     }
 
     try {
+        // Get account from wallet client
+        const account = walletClient.account;
+        if (!account) {
+            throw new Error('Wallet account not found');
+        }
+
         logger.log('[CCTP] Step 4: Minting USDC on destination chain...');
         onProgress?.({
             step: 'mint',
@@ -223,6 +237,7 @@ export async function completeCCTPBridge({
         });
 
         const mintHash = await walletClient.writeContract({
+            account,
             address: config.messageTransmitter,
             abi: MESSAGE_TRANSMITTER_ABI,
             functionName: 'receiveMessage',
