@@ -6,11 +6,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Loader2, Zap } from "lucide-react";
-import { useAccount, useWalletClient, useReadContract } from "wagmi";
-import { initBridgeKit, SUPPORTED_CHAINS, calculateBridgeFee, getEstimatedBridgeTime } from "@/lib/bridgeKit";
+import { useAccount, useWalletClient, useReadContract, usePublicClient } from "wagmi";
+import { SUPPORTED_CHAINS, calculateBridgeFee, getEstimatedBridgeTime, getChainById } from "@/lib/bridgeKit";
 import { ERC20_ABI, USDC_ADDRESS, EURC_ADDRESS, USYC_ADDRESS } from "@/lib/contracts";
 import { formatUnits } from "viem";
 import { NetworkIcon } from "@/components/ui/network-icon";
+import { executeCCTPBridge, isCCTPSupported } from "@/lib/cctp";
+import { useToast } from "@/hooks/use-toast";
 
 const TOKENS = [
     { symbol: "USDC", address: USDC_ADDRESS, decimals: 6 },
@@ -21,12 +23,15 @@ const TOKENS = [
 export function CrossChainBridgeWidget() {
     const { address, isConnected } = useAccount();
     const { data: walletClient } = useWalletClient();
+    const publicClient = usePublicClient();
+    const { toast } = useToast();
 
     const [fromChain, setFromChain] = useState("ethereum");
-    const [toChain, setToChain] = useState("arc");
+    const [toChain, setToChain] = useState("avalanche");
     const [selectedToken, setSelectedToken] = useState<"USDC" | "EURC" | "USYC">("USDC");
     const [amount, setAmount] = useState("");
     const [isBridging, setIsBridging] = useState(false);
+    const [bridgeStep, setBridgeStep] = useState<string>("");
 
     const currentToken = TOKENS.find(t => t.symbol === selectedToken)!;
 
@@ -51,18 +56,74 @@ export function CrossChainBridgeWidget() {
     const netAmount = amount ? (parseFloat(amount) - parseFloat(fee)).toFixed(6) : "0.00";
 
     const handleBridge = async () => {
-        if (!amount || !walletClient || !isConnected) return;
+        if (!amount || !walletClient || !isConnected || !address || !publicClient) {
+            toast({
+                title: "Connection Required",
+                description: "Please connect your wallet to bridge tokens.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const fromChainConfig = getChainById(fromChain);
+        const toChainConfig = getChainById(toChain);
+
+        if (!fromChainConfig || !toChainConfig) {
+            toast({
+                title: "Invalid Chain",
+                description: "Please select valid source and destination chains.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        // Check if chains support CCTP
+        if (!isCCTPSupported(fromChainConfig.chainId) || !isCCTPSupported(toChainConfig.chainId)) {
+            toast({
+                title: "CCTP Not Supported",
+                description: "Selected chains don't support Circle CCTP yet. Try Ethereum Sepolia ↔ Avalanche Fuji.",
+                variant: "destructive",
+            });
+            return;
+        }
 
         try {
             setIsBridging(true);
-            const bridgeKit = await initBridgeKit(walletClient);
+            setBridgeStep("Starting bridge...");
 
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            const result = await executeCCTPBridge({
+                walletClient,
+                publicClient,
+                fromChainId: fromChainConfig.chainId,
+                toChainId: toChainConfig.chainId,
+                amount,
+                recipientAddress: address,
+                onProgress: (progress) => {
+                    setBridgeStep(progress.message);
+                    toast({
+                        title: "Bridge Progress",
+                        description: progress.message,
+                    });
+                },
+            });
+
+            toast({
+                title: "Bridge Initiated! 🎉",
+                description: `Burn tx: ${result.burnTxHash.slice(0, 10)}... Switch to ${toChainConfig.name} to complete minting.`,
+            });
 
             setAmount("");
-            setIsBridging(false);
-        } catch (error) {
+            setBridgeStep("");
+
+        } catch (error: any) {
             console.error("Bridge error:", error);
+            toast({
+                title: "Bridge Failed",
+                description: error.message || "Failed to bridge tokens. Please try again.",
+                variant: "destructive",
+            });
+            setBridgeStep("");
+        } finally {
             setIsBridging(false);
         }
     };
@@ -214,21 +275,30 @@ export function CrossChainBridgeWidget() {
                 {/* Bridge Button */}
                 <Button
                     onClick={handleBridge}
-                    disabled={!amount || parseFloat(amount) <= 0 || isBridging || !isConnected}
-                    className="w-full h-12 text-base font-semibold bg-[#5D9CDB] hover:bg-[#4a8ac9] text-white shadow-md"
+                    disabled={!amount || isBridging || !isConnected}
+                    className="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                     {isBridging ? (
-                        <>
-                            <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                            Bridging...
-                        </>
+                        <div className="flex items-center gap-2">
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            <span>{bridgeStep || "Processing..."}</span>
+                        </div>
                     ) : (
-                        <>
-                            <Zap className="h-5 w-5 mr-2" />
-                            Bridge & Supply
-                        </>
+                        <div className="flex items-center gap-2">
+                            <Zap className="h-5 w-5" />
+                            <span>Bridge & Supply</span>
+                        </div>
                     )}
                 </Button>
+
+                {/* CCTP Info */}
+                {(fromChain === "arc" || toChain === "arc") && (
+                    <div className="mt-2 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                        <p className="text-xs text-yellow-600 dark:text-yellow-400">
+                            ⚠️ Arc Testnet doesn't have official CCTP deployment yet. Try Ethereum Sepolia ↔ Avalanche Fuji for real transfers.
+                        </p>
+                    </div>
+                )}
 
                 {!isConnected && (
                     <p className="text-xs text-center text-muted-foreground mt-2">

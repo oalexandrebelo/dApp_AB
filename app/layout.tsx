@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     title: "Nexux Lend - DeFi Lending Protocol on Arc Network",
     description: "Decentralized lending protocol on Arc Network. Supply, borrow, and bridge assets across chains with Circle CCTP integration.",
     manifest: '/manifest.json',
-    themeColor: '#7F201C',
+    themeColor: '#6B2C3E',
     appleWebApp: {
         capable: true,
         statusBarStyle: 'black-translucent',
