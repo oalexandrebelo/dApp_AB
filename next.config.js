@@ -62,6 +62,12 @@ const nextConfig = {
             };
         }
 
+        // Fix for React Native dependencies in web build
+        config.resolve.fallback = {
+            ...(config.resolve.fallback || {}),
+            '@react-native-async-storage/async-storage': false,
+        };
+
         return config;
     },
 

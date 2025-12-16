@@ -23,7 +23,7 @@ import {
     getWarningSeverityColor,
     getWarningSeverityIcon,
     type BridgeWarning,
-} from "@/lib/cctp/bridge";
+} from "@/lib/bridge";
 
 export function CrossChainBridgeWidget() {
     const { address, isConnected } = useAccount();
