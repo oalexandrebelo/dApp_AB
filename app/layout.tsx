@@ -43,6 +43,9 @@ export default async function RootLayout({
 
     return (
         <html lang="en" suppressHydrationWarning>
+            <head>
+                <meta name="theme-color" content="#6B2C3E" />
+            </head>
             <body className={inter.className}>
                 <Providers initialState={initialState}>
                     {children}
