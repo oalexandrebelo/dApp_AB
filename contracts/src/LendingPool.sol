@@ -167,7 +167,15 @@ contract LendingPool {
     }
     
     function setPriceOracle(address _priceOracle) external onlyOwner {
-        priceOracle = IPriceOracle(_priceOracle);
+        require(_priceOracle != address(0), "Invalid oracle address");
+        
+        // Validate oracle is working by checking USDC price
+        IPriceOracle newOracle = IPriceOracle(_priceOracle);
+        uint256 testPrice = newOracle.getAssetPrice(address(0x3600000000000000000000000000000000000000)); // USDC
+        require(testPrice > 0, "Oracle not working - price is zero");
+        require(testPrice < 2e8, "Oracle price too high - possible manipulation"); // USDC should be ~$1 (1e8)
+        
+        priceOracle = newOracle;
     }
     
     /**
@@ -533,22 +541,25 @@ contract LendingPool {
         if (totalSupply == 0) return 0;
         return (totalBorrowed[asset] * WAD) / totalSupply;
     }
-    
     // ============ Liquidation Functions ============
     
     /**
      * @notice Get liquidation close factor based on health factor
-     * @dev Aave V3 style: 50% normal, 100% emergency
+     * Three-tier system for gradual liquidation protection:
+     * - HF < 0.95: 100% (critical - full liquidation allowed)
+     * - 0.95 ≤ HF < 0.98: 75% (danger - partial liquidation)
+     * - 0.98 ≤ HF < 1.0: 50% (warning - limited liquidation)
      * @param healthFactor Current health factor (RAY precision)
-     * @return Close factor in WAD (0.5e18 = 50%, 1e18 = 100%)
+     * @return Close factor in basis points (10000 = 100%)
      */
     function _getCloseFactor(uint256 healthFactor) internal pure returns (uint256) {
-        // Emergency liquidation: HF < 0.95 → 100% close factor
         if (healthFactor < 0.95e27) {
-            return WAD; // 100%
+            return 10000;  // 100% - Critical: allow full liquidation
+        } else if (healthFactor < 0.98e27) {
+            return 7500;   // 75% - Danger: allow most liquidation
+        } else {
+            return 5000;   // 50% - Warning: allow half liquidation
         }
-        // Normal liquidation: HF < 1.0 → 50% close factor
-        return 0.5e18; // 50%
     }
     
     /**
@@ -660,13 +671,15 @@ contract LendingPool {
      * @param user Address of the borrower to liquidate
      * @param debtToCover Amount of debt to repay
      * @param receiveAToken If true, receive aTokens instead of underlying
+     * @param minCollateralReceived Minimum collateral to receive (slippage protection)
      */
     function liquidate(
         address collateralAsset,
         address debtAsset,
         address user,
         uint256 debtToCover,
-        bool receiveAToken
+        bool receiveAToken,
+        uint256 minCollateralReceived
     ) external {
         require(assetConfigs[collateralAsset].isActive, "Collateral not active");
         require(assetConfigs[debtAsset].isActive, "Debt asset not active");
@@ -694,6 +707,12 @@ contract LendingPool {
             collateralAsset,
             debtAsset,
             actualDebtToCover
+        );
+        
+        // SECURITY: Slippage protection against front-running
+        require(
+            collateralToSeize >= minCollateralReceived,
+            "Slippage too high - collateral below minimum"
         );
         
         // Check user has enough collateral
