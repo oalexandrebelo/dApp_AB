@@ -106,7 +106,7 @@ export const CHAIN_METADATA: Record<number, ChainMetadata> = {
         minGasBalance: parseEther('0.1'), // 0.1 MATIC
     },
 
-    // Arc Testnet (No CCTP)
+    // Arc Testnet (Circle's Native L1 - CCTP Supported)
     5042002: {
         chainId: 5042002,
         name: 'Arc Testnet',
@@ -116,9 +116,9 @@ export const CHAIN_METADATA: Record<number, ChainMetadata> = {
             symbol: 'USDC',
             decimals: 6,
         },
-        rpcUrl: 'https://rpc-testnet.arc.network',
+        rpcUrl: 'https://testnet.arc.network',
         blockExplorer: 'https://testnet.arcscan.net',
-        cctpSupported: false,
+        cctpSupported: true, // Arc is Circle's native blockchain with CCTP
         minGasBalance: BigInt(1000000), // 1 USDC (6 decimals)
     },
 };
