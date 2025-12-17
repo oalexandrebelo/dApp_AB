@@ -50,17 +50,27 @@ const ChainLogos: Record<string, React.FC<{ className?: string }>> = {
             <path d="M177.133 316.446C162.247 316.446 150.051 312.943 140.544 305.938C131.162 298.808 126.471 288.676 126.471 275.541C126.471 272.789 126.784 269.411 127.409 265.408C129.036 254.402 131.35 242.524 134.352 229.775C142.858 198.559 164.812 182.951 200.214 182.951C207.478 182.951 214.303 183.702 220.69 185.205C227.076 186.582 232.962 188.648 238.348 191.4L230.522 232.403C225.136 229.65 219.813 227.647 214.553 226.393C209.292 225.14 204.032 224.513 198.772 224.513C188.452 224.513 180.788 227.079 175.778 232.215C170.768 237.351 167.424 245.055 165.747 255.33C164.257 264.104 163.382 271.433 163.132 277.318C162.881 283.203 164.132 287.581 166.882 290.458C169.758 293.209 174.697 294.585 181.699 294.585C186.959 294.585 192.157 293.896 197.293 292.518C202.428 291.139 207.127 289.26 211.389 286.883L203.126 327.886C197.74 330.387 191.916 332.265 185.655 333.518C179.394 334.771 172.882 335.397 166.119 335.397L177.133 316.446ZM253.042 334.522L285.567 184.204H324.555L310.106 252.148H346.634L361.083 184.204H400.071L367.546 334.522H328.558L343.882 262.449H307.354L292.03 334.522H253.042Z" fill="white" />
         </svg>
     ),
-    // Arc Testnet - Circle's Native L1
+    // Arc Testnet - Official Circle Design
     'arc': ({ className = 'w-6 h-6' }) => (
-        <svg className={className} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 48 48" aria-hidden="true" focusable="false" role="img">
+            <g clipPath="url(#clip0_arc)">
+                <path fill="url(#paint0_linear_arc)" d="M48 24C48 10.745 37.255 0 24 0S0 10.745 0 24s10.745 24 24 24 24-10.745 24-24"></path>
+                <path fill="url(#paint1_linear_arc)" d="M23.993 8.4c3.957 0 7.473 3.428 9.903 9.651 1.264 3.237 2.194 7.083 2.745 11.267.05.374.091.753.134 1.132q.023.037.02.063c.001.009.324 2.03.392 5.537h-.036c-.48-.394-6.144-4.845-15.533-3.556.141-1.589.336-3.135.588-4.617l.04-.224c3.683-.111 6.906.317 9.378.877l-.026-.177c-.508-3.164-1.258-6.06-2.224-8.536-1.58-4.048-3.642-6.562-5.38-6.562-1.739 0-3.801 2.514-5.381 6.562-.383.979-.731 2.023-1.043 3.124a47 47 0 0 0-1.102 4.936 62 62 0 0 0-.81 8.173H10.8c.224-6.77 1.372-13.087 3.29-17.999 2.43-6.224 5.947-9.651 9.903-9.651"></path>
+            </g>
             <defs>
-                <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#00D4FF" />
-                    <stop offset="100%" stopColor="#0052FF" />
+                <linearGradient id="paint0_linear_arc" x1="24" x2="24" y1="0" y2="48" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#000B24"></stop>
+                    <stop offset="0.743" stopColor="#052950"></stop>
+                    <stop offset="1" stopColor="#416D91"></stop>
                 </linearGradient>
+                <linearGradient id="paint1_linear_arc" x1="23.994" x2="46.193" y1="8.4" y2="54.921" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#fff"></stop>
+                    <stop offset="1" stopColor="#fff" stopOpacity="0"></stop>
+                </linearGradient>
+                <clipPath id="clip0_arc">
+                    <path fill="#fff" d="M0 0h48v48H0z"></path>
+                </clipPath>
             </defs>
-            <circle cx="50" cy="50" r="48" fill="url(#arcGradient)" />
-            <path d="M30 65 L50 25 L70 65 M35 55 L65 55" stroke="white" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" fill="none" />
         </svg>
     ),
 };
