@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAccount, useReadContracts } from 'wagmi';
 import { USDC_ADDRESS, EURC_ADDRESS, USYC_ADDRESS, LENDING_POOL_ADDRESS, LENDING_POOL_ABI } from './contracts';
-import { calculateHealthFactor } from './healthFactor';
+import { calculateHealthFactorLegacy } from './healthFactor';
 import { parseBalances } from './contractHelpers';
 
 interface HealthFactorDataPoint {
@@ -40,7 +40,7 @@ export function useHealthFactorHistory() {
 
         // Parse current balances
         const balances = parseBalances(results);
-        const currentHF = calculateHealthFactor(balances[0] + balances[1] + balances[2], balances[3] + balances[4] + balances[5]);
+        const currentHF = calculateHealthFactorLegacy(balances[0] + balances[1] + balances[2], balances[3] + balances[4] + balances[5]);
 
         // Load history from localStorage
         const loadHistory = (): HealthFactorDataPoint[] => {

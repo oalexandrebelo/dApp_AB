@@ -126,15 +126,17 @@ export function validateAddress(address: string): boolean {
 export function calculateHealthFactor(
     totalCollateralUSD: bigint,
     totalDebtUSD: bigint
-): number {
-    if (totalDebtUSD === BigInt(0)) return Infinity;
+): bigint {
+    if (totalDebtUSD === BigInt(0)) return BigInt(Number.MAX_SAFE_INTEGER);
 
-    const collateral = parseFloat(formatUnits(totalCollateralUSD, 6));
-    const debt = parseFloat(formatUnits(totalDebtUSD, 6));
+    // LTV = 80% (8000 basis points)
+    const LTV_BASIS_POINTS = BigInt(8000);
+    const BASIS_POINTS_DIVISOR = BigInt(10000);
+    const WAD = BigInt(10) ** BigInt(18);
 
-    // Simplified HF = Collateral * LTV / Debt
-    const LTV = 0.8; // 80%
-    return (collateral * LTV) / debt;
+    // Calculate: (collateral * 0.8) / debt, scaled by WAD for precision
+    const adjustedCollateral = (totalCollateralUSD * LTV_BASIS_POINTS) / BASIS_POINTS_DIVISOR;
+    return (adjustedCollateral * WAD) / totalDebtUSD;
 }
 
 export function calculateRiskLevel(healthFactor: number): 'safe' | 'moderate' | 'risky' | 'critical' {
@@ -383,9 +385,13 @@ export async function getUserPositionSummary(
             healthFactor,
         ] = accountData;
 
+        // Convert BigInt values to numbers for display
+        // USD values are in 6 decimals, convert to standard USD
         const totalSupplied = parseFloat(formatUnits(totalCollateralUSD, 6));
         const totalBorrowed = parseFloat(formatUnits(totalDebtUSD, 6));
         const availableBorrow = parseFloat(formatUnits(availableBorrowsUSD, 6));
+
+        // Health factor from contract is in WAD (18 decimals), convert to number
         const healthFactorValue = parseFloat(formatUnits(healthFactor, 18));
 
         return {

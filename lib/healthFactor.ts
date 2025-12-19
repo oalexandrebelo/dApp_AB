@@ -1,7 +1,37 @@
 /**
- * Calculate health factor based on supplied and borrowed amounts
+ * WAD precision constant (1e18) for scaled math
+ */
+const PRECISION_WAD = BigInt(10) ** BigInt(18);
+
+/**
+ * Calculate health factor based on supplied and borrowed amounts (BigInt version)
+ * @param totalSuppliedUSD Total supplied in USD (6 decimals, as bigint)
+ * @param totalBorrowedUSD Total borrowed in USD (6 decimals, as bigint)
+ * @param eModeCategory E-Mode category (0 = disabled, 1 = stablecoins)
+ * @returns Health factor as bigint scaled by WAD (1e18). Divide by 1e18 for display.
  */
 export function calculateHealthFactor(
+    totalSuppliedUSD: bigint,
+    totalBorrowedUSD: bigint,
+    eModeCategory: number = 0
+): bigint {
+    if (totalBorrowedUSD === BigInt(0)) return BigInt(Number.MAX_SAFE_INTEGER); // Infinite health
+
+    // LTV in basis points: 9700 = 97%, 7500 = 75%
+    const ltvBasisPoints = eModeCategory === 1 ? BigInt(9700) : BigInt(7500);
+
+    // Calculate max borrow = totalSupplied * LTV / 10000
+    const maxBorrow = (totalSuppliedUSD * ltvBasisPoints) / BigInt(10000);
+
+    // Health factor = maxBorrow / totalBorrowed (scaled by WAD for precision)
+    return (maxBorrow * PRECISION_WAD) / totalBorrowedUSD;
+}
+
+/**
+ * Legacy wrapper for backward compatibility with components using number
+ * @deprecated Use calculateHealthFactor with BigInt instead
+ */
+export function calculateHealthFactorLegacy(
     totalSupplied: number,
     totalBorrowed: number,
     eModeCategory: number = 0

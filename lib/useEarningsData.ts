@@ -38,10 +38,10 @@ export function useEarningsData(timeframe: '24h' | '7d' | '30d') {
         const eurcBalance = results[1]?.result ? Number(formatUnits(results[1].result as bigint, 6)) : 0;
         const usycBalance = results[2]?.result ? Number(formatUnits(results[2].result as bigint, 6)) : 0;
 
-        // Parse APYs (assuming they're in basis points, e.g., 500 = 5%)
-        const usdcAPY = results[3]?.result ? Number(results[3].result) / 10000 : 0;
-        const eurcAPY = results[4]?.result ? Number(results[4].result) / 10000 : 0;
-        const usycAPY = results[5]?.result ? Number(results[5].result) / 10000 : 0;
+        // Parse APYs (returned in WAD: 1e18 = 100%)
+        const usdcAPY = results[3]?.result ? Number(formatUnits(results[3].result as bigint, 18)) : 0;
+        const eurcAPY = results[4]?.result ? Number(formatUnits(results[4].result as bigint, 18)) : 0;
+        const usycAPY = results[5]?.result ? Number(formatUnits(results[5].result as bigint, 18)) : 0;
 
         // Calculate total current balance
         const totalBalance = usdcBalance + eurcBalance + usycBalance;

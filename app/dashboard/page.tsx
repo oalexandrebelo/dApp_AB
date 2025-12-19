@@ -23,7 +23,7 @@ import { useAccount, useReadContracts } from "wagmi";
 import { formatUnits } from "viem";
 import { USDC_ADDRESS, EURC_ADDRESS, USYC_ADDRESS, LENDING_POOL_ADDRESS, LENDING_POOL_ABI, ERC20_ABI } from "@/lib/contracts";
 import { parseBalances } from "@/lib/contractHelpers";
-import { calculateHealthFactor } from "@/lib/healthFactor";
+import { calculateHealthFactorLegacy } from "@/lib/healthFactor";
 import { HeroMetricsSkeleton, AssetTableSkeleton } from "@/components/SkeletonLoaders";
 import { Header } from "@/components/Header";
 import { EarningsChart } from "@/components/analytics/EarningsChart";
@@ -78,7 +78,7 @@ export default function DashboardPage() {
     const netWorth = totalSupplied - totalBorrowed;
 
     // Calculate Health Factor using helper
-    const healthFactor = calculateHealthFactor(totalSupplied, totalBorrowed, eModeCategory);
+    const healthFactor = calculateHealthFactorLegacy(totalSupplied, totalBorrowed, eModeCategory);
 
     // Monitor liquidation risk
     useLiquidationMonitor({ healthFactor, totalSupplied, totalBorrowed });
