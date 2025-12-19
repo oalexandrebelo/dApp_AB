@@ -12,7 +12,7 @@ export default function MouseParticles() {
         const container = containerRef.current;
 
         // Config parameters - smoothed as requested
-        const PARTICLE_COUNT = 8000; // Slightly reduced for performance
+        const PARTICLE_COUNT = 1500; // Optimized for mobile performance (was 8000)
         const PARTICLE_SIZE = 2.5;
         const INFLUENCE = 200;       // Increased influence for smoother feel
         const STRENGTH = 150.0;
