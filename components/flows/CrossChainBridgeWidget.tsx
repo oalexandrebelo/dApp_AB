@@ -15,8 +15,6 @@ import { useToast } from "@/hooks/use-toast";
 import {
     getCCTPChains,
     getChainMetadata,
-    executeCCTPBridge,
-    estimateBridgeFees,
     validateBridgeInputs,
     getAllWarnings,
     addToHistory,
@@ -24,6 +22,7 @@ import {
     getWarningSeverityIcon,
     type BridgeWarning,
 } from "@/lib/bridge";
+import { useBridgeKit, useBridgeFeeEstimate } from "@/lib/bridge-kit/hooks";
 
 export function CrossChainBridgeWidget() {
     const { address, isConnected } = useAccount();
@@ -37,9 +36,25 @@ export function CrossChainBridgeWidget() {
     const [fromChainId, setFromChainId] = useState(cctpChains[0]?.chainId || 11155111);
     const [toChainId, setToChainId] = useState(cctpChains[1]?.chainId || 43113);
     const [amount, setAmount] = useState("");
-    const [isBridging, setIsBridging] = useState(false);
-    const [bridgeStep, setBridgeStep] = useState<string>("");
     const [warnings, setWarnings] = useState<BridgeWarning[]>([]);
+
+    // Bridge-Kit Hooks
+    const {
+        executeBridge,
+        isLoading: isBridging,
+        progress: bridgeStep,
+        error: bridgeError
+    } = useBridgeKit();
+
+    const {
+        estimate,
+        isLoading: isEstimating,
+        error: estimateError
+    } = useBridgeFeeEstimate({
+        fromChainId,
+        toChainId,
+        amount
+    });
 
     // Balance Fetching
     const { data: balanceData } = useReadContract({
@@ -61,12 +76,9 @@ export function CrossChainBridgeWidget() {
     const fromChainConfig = getChainMetadata(fromChainId);
     const toChainConfig = getChainMetadata(toChainId);
 
-    // Calculate fees
-    const fees = amount && fromChainConfig && toChainConfig
-        ? estimateBridgeFees(amount, fromChainId, toChainId)
-        : { cctpFee: "0.00", gasFee: "0.00", totalFee: "0.00", feePercentage: 0.1 };
-
-    const netAmount = amount ? (parseFloat(amount) - parseFloat(fees.cctpFee)).toFixed(6) : "0.00";
+    // Calculate fees from estimate or fallback
+    const fees = estimate?.feeInfo || { cctpFee: "0.00", gasFee: "0.00", totalFee: "0.00", feePercentage: 0.1 };
+    const netAmount = amount && estimate?.netAmount ? estimate.netAmount : "0.00";
 
     // Update warnings when inputs change
     useEffect(() => {
@@ -111,23 +123,10 @@ export function CrossChainBridgeWidget() {
         }
 
         try {
-            setIsBridging(true);
-            setBridgeStep("Starting bridge...");
-
-            const result = await executeCCTPBridge({
-                walletClient,
-                publicClient,
+            const result: any = await executeBridge({
                 fromChainId,
                 toChainId,
                 amount,
-                recipientAddress: address,
-                onProgress: (progress) => {
-                    setBridgeStep(progress.message);
-                    toast({
-                        title: "Bridge Progress",
-                        description: progress.message,
-                    });
-                },
             });
 
             // Add to history
@@ -135,30 +134,25 @@ export function CrossChainBridgeWidget() {
                 fromChainId,
                 toChainId,
                 amount,
-                burnTxHash: result.burnTxHash,
-                messageHash: result.messageHash,
-                status: result.status === 'ready_to_mint' ? 'ready_to_mint' : 'pending',
+                burnTxHash: result?.burnTxHash || result?.hash || '0x...',
+                messageHash: result?.messageHash || result?.id || '0x...',
+                status: (result?.status === 'ready_to_mint' || result?.status === 'completed') ? 'ready_to_mint' : 'pending',
                 recipientAddress: address,
             });
 
             toast({
                 title: "Bridge Initiated! 🎉",
-                description: `Burn tx: ${result.burnTxHash.slice(0, 10)}... Switch to ${toChainConfig?.name} to complete minting.`,
+                description: `Bridge transaction successful. USDC will be available on ${toChainConfig?.name} shortly.`,
             });
 
             setAmount("");
-            setBridgeStep("");
 
         } catch (error: any) {
-            console.error("Bridge error:", error);
             toast({
                 title: "Bridge Failed",
                 description: error.message || "Failed to bridge tokens. Please try again.",
                 variant: "destructive",
             });
-            setBridgeStep("");
-        } finally {
-            setIsBridging(false);
         }
     };
 
@@ -280,23 +274,43 @@ export function CrossChainBridgeWidget() {
                     </div>
                 )}
 
+                {/* Estimation Error */}
+                {estimateError && (
+                    <div className="p-3 rounded-lg border bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800 flex items-start gap-2">
+                        <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5" />
+                        <div className="text-sm text-red-600 dark:text-red-400">
+                            <p className="font-semibold">Fee Estimation Failed</p>
+                            <p>Unable to calculate bridge fees. Please try again or check your connection.</p>
+                        </div>
+                    </div>
+                )}
+
                 {/* Bridge Details */}
-                {amount && parseFloat(amount) > 0 && (
-                    <div className="space-y-2 p-4 bg-secondary/20 rounded-lg text-sm border border-border/50">
-                        <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Bridge Fee ({fees.feePercentage}%)</span>
-                            <span className="font-medium">{fees.cctpFee} USDC</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">You Will Receive</span>
-                            <span className="font-bold text-green-400">{netAmount} USDC</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                            <span className="text-muted-foreground">Estimated Time</span>
-                            <span className="text-xs text-foreground">
-                                {fromChainId === 11155111 || toChainId === 11155111 ? '~15-20 min' : '~5-10 min'}
-                            </span>
-                        </div>
+                {amount && parseFloat(amount) > 0 && !estimateError && (
+                    <div className="space-y-2 p-4 bg-secondary/20 rounded-lg text-sm border border-border/50 animate-in fade-in slide-in-from-top-2 duration-300">
+                        {isEstimating ? (
+                            <div className="flex items-center justify-center py-4 text-muted-foreground gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <span>Calculating fees...</span>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Bridge Fee ({fees.feePercentage}%)</span>
+                                    <span className="font-medium">{fees.cctpFee} USDC</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">You Will Receive</span>
+                                    <span className="font-bold text-green-600 dark:text-green-400">{netAmount} USDC</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Estimated Time</span>
+                                    <span className="text-xs text-foreground bg-background px-2 py-0.5 rounded-full border">
+                                        {fromChainId === 11155111 || toChainId === 11155111 ? '~15-20 min' : '~5-10 min'}
+                                    </span>
+                                </div>
+                            </>
+                        )}
                     </div>
                 )}
 

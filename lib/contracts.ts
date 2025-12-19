@@ -1,7 +1,7 @@
 
 export const ARC_TESTNET_CHAIN_ID = 5042002;
 
-export const BRIDGE_ADDRESS = "0x278d9d6a0bd526a22562ff61d51532ab8b707555"; // Deployed on Arc Testnet
+export const BRIDGE_ADDRESS = "0x278d9d6a0bd526a22562ff61d51532ab8b707555" as const; // Deployed on Arc Testnet
 
 export const USDC_ADDRESS = "0x3600000000000000000000000000000000000000"; // Arc Testnet Native USDC
 export const EURC_ADDRESS = "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a"; // Arc Testnet EURC
@@ -48,7 +48,7 @@ export const ERC20_ABI = [
     },
 ] as const;
 
-export const LENDING_POOL_ADDRESS = "0x6Ad44Fd3a516730adE6cF795a3c35baEEF45f8C0"; // LendingPool V2 - Deployed 09/12/2024
+export const LENDING_POOL_ADDRESS = "0x6Ad44Fd3a516730adE6cF795a3c35baEEF45f8C0" as const; // LendingPool V4 - Deployed 10/12/2024 (Active)
 
 export const LENDING_POOL_ABI = [
     {

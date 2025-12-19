@@ -5,7 +5,6 @@
  */
 
 import { parseEther } from 'viem';
-import { isCCTPSupported } from '../cctp';
 import type { ChainMetadata, BridgeRoute, BridgeWarning } from './types';
 
 // Chain Metadata for all supported chains
@@ -23,6 +22,7 @@ export const CHAIN_METADATA: Record<number, ChainMetadata> = {
         rpcUrl: 'https://rpc.sepolia.org',
         blockExplorer: 'https://sepolia.etherscan.io',
         cctpSupported: true,
+        usdc: '0x1c7D4B196Cb0232b30444390066223271bc99565', // Sepolia USDC
         minGasBalance: parseEther('0.01'), // 0.01 ETH
     },
 
@@ -39,6 +39,7 @@ export const CHAIN_METADATA: Record<number, ChainMetadata> = {
         rpcUrl: 'https://api.avax-test.network/ext/bc/C/rpc',
         blockExplorer: 'https://testnet.snowtrace.io',
         cctpSupported: true,
+        usdc: '0x5425890298aed601595a70AB815c96711a31Bc65', // Fuji USDC
         minGasBalance: parseEther('0.1'), // 0.1 AVAX
     },
 
@@ -55,6 +56,7 @@ export const CHAIN_METADATA: Record<number, ChainMetadata> = {
         rpcUrl: 'https://sepolia.optimism.io',
         blockExplorer: 'https://sepolia-optimism.etherscan.io',
         cctpSupported: true,
+        usdc: '0x5fd84259d66Cd46123540766Be93DFE6D43130D7', // OP Sepolia USDC
         minGasBalance: parseEther('0.005'), // 0.005 ETH
     },
 
@@ -71,6 +73,7 @@ export const CHAIN_METADATA: Record<number, ChainMetadata> = {
         rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
         blockExplorer: 'https://sepolia.arbiscan.io',
         cctpSupported: true,
+        usdc: '0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d', // Arb Sepolia USDC
         minGasBalance: parseEther('0.005'), // 0.005 ETH
     },
 
@@ -87,6 +90,7 @@ export const CHAIN_METADATA: Record<number, ChainMetadata> = {
         rpcUrl: 'https://sepolia.base.org',
         blockExplorer: 'https://sepolia.basescan.org',
         cctpSupported: true,
+        usdc: '0x036CbD53842c5426634e7929541eC2318f3dCF7e', // Base Sepolia USDC
         minGasBalance: parseEther('0.005'), // 0.005 ETH
     },
 
@@ -103,6 +107,7 @@ export const CHAIN_METADATA: Record<number, ChainMetadata> = {
         rpcUrl: 'https://rpc-amoy.polygon.technology',
         blockExplorer: 'https://amoy.polygonscan.com',
         cctpSupported: true,
+        usdc: '0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582', // Amoy USDC
         minGasBalance: parseEther('0.1'), // 0.1 MATIC
     },
 
@@ -119,6 +124,7 @@ export const CHAIN_METADATA: Record<number, ChainMetadata> = {
         rpcUrl: 'https://testnet.arc.network',
         blockExplorer: 'https://testnet.arcscan.net',
         cctpSupported: true, // Arc is Circle's native blockchain with CCTP
+        usdc: '0x3600000000000000000000000000000000000000', // Arc Native USDC
         minGasBalance: BigInt(1000000), // 1 USDC (6 decimals)
     },
 };
@@ -236,5 +242,5 @@ export function getAllChains(): ChainMetadata[] {
  * Check if chain supports CCTP
  */
 export function isChainCCTPSupported(chainId: number): boolean {
-    return isCCTPSupported(chainId);
+    return !!CHAIN_METADATA[chainId]?.cctpSupported;
 }

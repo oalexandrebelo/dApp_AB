@@ -1,0 +1,43 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - main [ref=e4]:
+    - generic [ref=e5]:
+      - button "🇺🇸 English" [ref=e7] [cursor=pointer]:
+        - generic [ref=e8]: 🇺🇸
+        - generic [ref=e9]: English
+      - generic [ref=e10]:
+        - img "Nexux Lend" [ref=e12]
+        - generic [ref=e13]:
+          - heading "The Future of DeFi Lending" [level=1] [ref=e14]:
+            - text: The Future of
+            - text: DeFi Lending
+          - paragraph [ref=e15]: Experience the next generation of cross-chain lending and borrowing using CCTP. Instant, secure, and purely decentralized.
+        - button "Launch dApp" [ref=e17] [cursor=pointer]:
+          - text: Launch dApp
+          - img [ref=e18]
+        - generic [ref=e20]:
+          - generic [ref=e21]:
+            - img [ref=e23]
+            - heading "Cross-Chain Native" [level=3] [ref=e27]
+            - paragraph [ref=e28]: Seamlessly lend and borrow across Ethereum, Base, Optimism and more using Circle CCTP.
+          - generic [ref=e29]:
+            - img [ref=e31]
+            - heading "Institutional Grade" [level=3] [ref=e33]
+            - paragraph [ref=e34]: Audited smart contracts and rigorous risk management parameters for your assets.
+          - generic [ref=e35]:
+            - img [ref=e37]
+            - heading "Instant Finality" [level=3] [ref=e39]
+            - paragraph [ref=e40]: Lightning fast transactions with optimized gas usage and instant settlement.
+  - region "Notifications (F8)":
+    - list
+  - button "Open Next.js Dev Tools" [ref=e46] [cursor=pointer]:
+    - generic [ref=e49]:
+      - text: Compiling
+      - generic [ref=e50]:
+        - generic [ref=e51]: .
+        - generic [ref=e52]: .
+        - generic [ref=e53]: .
+  - alert [ref=e54]
+```

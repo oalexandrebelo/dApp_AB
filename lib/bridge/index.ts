@@ -42,17 +42,6 @@ export {
     hasSufficientBalance,
 } from './balance';
 
-// Re-export fee utilities
-export {
-    calculateCCTPFee,
-    getEstimatedGasCost,
-    estimateBridgeFees,
-    getEstimatedBridgeTime,
-    formatBridgeTime,
-    calculateNetAmount,
-    getFeeBreakdown,
-} from './fees';
-
 // Re-export transaction utilities
 export {
     getBridgeHistory,
@@ -92,14 +81,8 @@ export {
     getHighestSeverity,
 } from './warnings';
 
-// Re-export CCTP bridge functions
-export {
-    executeCCTPBridge,
-    completeCCTPBridge,
-} from '../cctp/bridge';
-
-export {
-    getCCTPConfig,
-    isCCTPSupported as isCCTPSupportedByChainId,
-    CCTP_DOMAINS,
-} from '../cctp/config';
+// Re-export Bridge-Kit utilities
+export { useBridgeKit, useBridgeFeeEstimate } from '../bridge-kit/hooks';
+export { getBridgeKit, BRIDGE_FEE_CONFIG, CHAIN_NAME_MAP } from '../bridge-kit/config';
+export { createBridgeAdapter, isAdapterReady } from '../bridge-kit/adapters';
+export type { BridgeKitChain, BridgeKitConfig, BridgeFeeConfig, BridgeParams } from '../bridge-kit/types';

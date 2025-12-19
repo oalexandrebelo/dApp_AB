@@ -6,7 +6,6 @@
  */
 
 import { type PublicClient, formatUnits, parseUnits } from 'viem';
-import { getCCTPConfig } from '../cctp/config';
 import { ERC20_ABI } from '../contracts';
 import { getChainMetadata } from './chains';
 import type { BalanceInfo, BalanceValidation } from './types';
@@ -19,15 +18,16 @@ export async function checkUSDCBalance(
     chainId: number,
     publicClient: PublicClient
 ): Promise<bigint> {
-    const config = getCCTPConfig(chainId);
+    const chainMetadata = getChainMetadata(chainId);
+    const usdcAddress = chainMetadata?.usdc;
 
-    if (!config) {
-        throw new Error(`CCTP not supported on chain ${chainId}`);
+    if (!usdcAddress) {
+        throw new Error(`USDC address not found for chain ${chainId}`);
     }
 
     try {
         const balance = await publicClient.readContract({
-            address: config.usdc,
+            address: usdcAddress,
             abi: ERC20_ABI,
             functionName: 'balanceOf',
             args: [address],

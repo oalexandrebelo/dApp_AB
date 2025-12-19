@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/providers';
@@ -13,7 +13,6 @@ export const metadata: Metadata = {
     title: "Nexux Lend - DeFi Lending Protocol on Arc Network",
     description: "Decentralized lending protocol on Arc Network. Supply, borrow, and bridge assets across chains with Circle CCTP integration.",
     manifest: '/manifest.json',
-    themeColor: '#6B2C3E',
     appleWebApp: {
         capable: true,
         statusBarStyle: 'black-translucent',
@@ -24,12 +23,15 @@ export const metadata: Metadata = {
         apple: '/apple-touch-icon.png',
         shortcut: '/icon-32x32.png',
     },
-    viewport: {
-        width: 'device-width',
-        initialScale: 1,
-        maximumScale: 1,
-        userScalable: false,
-    },
+};
+
+export const viewport: Viewport = {
+    trigger: "viewport",
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    themeColor: '#6B2C3E',
 };
 
 export default async function RootLayout({
