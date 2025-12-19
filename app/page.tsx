@@ -1,15 +1,11 @@
 import { HeroSection } from "@/components/landing/HeroSection";
-import dynamic from 'next/dynamic';
+import MouseParticlesLazy from "@/components/ui/MouseParticlesLazy";
 
-const MouseParticles = dynamic(() => import('@/components/ui/MouseParticles'), {
-    ssr: false,
-    loading: () => null
-});
 
 export default function Home() {
     return (
         <main className="min-h-screen relative overflow-hidden">
-            <MouseParticles />
+            <MouseParticlesLazy />
             <HeroSection />
         </main>
     );
