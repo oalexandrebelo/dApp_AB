@@ -1,9 +1,11 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { TrendingUp, TrendingDown, Shield } from "lucide-react";
+import { TrendingUp, TrendingDown, Wallet, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Web3Tooltip } from "@/components/Web3Tooltip";
+import { CountUp } from "@/components/react-bits/CountUp";
+import { motion } from "framer-motion";
 
 interface HeroMetricsProps {
     netWorth: number;
@@ -11,6 +13,89 @@ interface HeroMetricsProps {
     totalBorrowed: number;
     healthFactor: number;
     isConnected: boolean;
+}
+
+// Glass card with gradient border
+const glassCard = cn(
+    "backdrop-blur-md bg-card/40",
+    "border border-white/10",
+    "shadow-xl hover:shadow-2xl",
+    "transition-all duration-300",
+    "rounded-xl overflow-hidden"
+);
+
+// Stagger animation variants
+const container = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.08,
+            delayChildren: 0.1,
+        },
+    },
+};
+
+const item = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    show: {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { duration: 0.4, ease: "easeOut" }
+    },
+};
+
+// Mini Health Factor indicator
+function MiniHealthGauge({ value }: { value: number }) {
+    const getColor = () => {
+        if (value >= 1.5) return "#22c55e"; // green
+        if (value >= 1.2) return "#eab308"; // yellow
+        if (value >= 1.0) return "#f97316"; // orange
+        return "#ef4444"; // red
+    };
+
+    const getStatus = () => {
+        if (value >= 1.5) return "Safe";
+        if (value >= 1.2) return "Moderate";
+        if (value >= 1.0) return "Risky";
+        return "At Risk";
+    };
+
+    const percentage = Math.min((value / 3) * 100, 100);
+
+    return (
+        <div className="space-y-2">
+            {/* Value display */}
+            <div className="flex items-baseline gap-1">
+                <span
+                    className="text-4xl font-bold tracking-tight"
+                    style={{ color: getColor() }}
+                >
+                    {value.toFixed(2)}
+                </span>
+            </div>
+
+            {/* Progress bar */}
+            <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                <motion.div
+                    className="h-full rounded-full"
+                    style={{ backgroundColor: getColor() }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${percentage}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                />
+            </div>
+
+            {/* Status label */}
+            <p
+                className="text-xs font-medium uppercase tracking-wider"
+                style={{ color: getColor() }}
+            >
+                {getStatus()}
+            </p>
+        </div>
+    );
 }
 
 export function HeroMetrics({
@@ -22,135 +107,182 @@ export function HeroMetrics({
 }: HeroMetricsProps) {
     if (!isConnected) {
         return (
-            <Card className="border-dashed">
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                    <Shield className="h-12 w-12 text-muted-foreground mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">Connect Your Wallet</h3>
-                    <p className="text-sm text-muted-foreground text-center max-w-md">
-                        Connect your wallet to view your positions, supply assets, and start earning yield.
-                    </p>
-                </CardContent>
-            </Card>
-        );
-    }
-
-    const getHealthFactorColor = (hf: number) => {
-        if (hf >= 2) return "text-success-500";
-        if (hf >= 1.2) return "text-yellow-500";
-        return "text-red-500";
-    };
-
-    const getHealthFactorStatus = (hf: number) => {
-        if (hf >= 2) return "Safe";
-        if (hf >= 1.2) return "Moderate";
-        return "At Risk";
-    };
-
-    return (
-        <div className="space-y-4">
-            {/* Main Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Net Worth - Primary */}
-                <Card className="md:col-span-1 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-                    <CardContent className="p-4 text-center">
-                        <p className="text-xs text-muted-foreground mb-2">Net Worth</p>
-                        <p className="text-4xl font-bold tracking-tight">
-                            ${netWorth.toFixed(2)}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                            Across all assets
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.3 }}
+            >
+                <Card className={cn(glassCard, "border-dashed border-cyan-500/30")}>
+                    <CardContent className="flex flex-col items-center justify-center py-16">
+                        <motion.div
+                            animate={{
+                                scale: [1, 1.05, 1],
+                                rotate: [0, 5, -5, 0],
+                            }}
+                            transition={{
+                                duration: 3,
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                            }}
+                        >
+                            <Wallet className="h-16 w-16 text-cyan-400/60 mb-6" />
+                        </motion.div>
+                        <h3 className="text-2xl font-bold mb-3 bg-gradient-to-r from-cyan-400 to-violet-400 bg-clip-text text-transparent">
+                            Connect Your Wallet
+                        </h3>
+                        <p className="text-sm text-muted-foreground text-center max-w-md leading-relaxed">
+                            Connect your wallet to view your positions, supply assets, and start earning yield.
                         </p>
                     </CardContent>
                 </Card>
+            </motion.div>
+        );
+    }
 
-                {/* Total Supplied */}
-                <Card className="hover:shadow-elevation-2 transition-shadow">
-                    <CardContent className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                            <p className="text-xs text-muted-foreground">📈 Total Supplied</p>
+    const showHealthFactor = totalBorrowed > 0;
+
+    return (
+        <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+            variants={container}
+            initial="hidden"
+            animate="show"
+        >
+            {/* Net Worth */}
+            <motion.div variants={item}>
+                <Card className={cn(
+                    glassCard,
+                    "relative group",
+                    "before:absolute before:inset-0 before:rounded-xl before:p-px",
+                    "before:bg-gradient-to-br before:from-cyan-500/30 before:via-transparent before:to-violet-500/30",
+                    "before:-z-10"
+                )}>
+                    <CardContent className="p-5">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/20 to-violet-500/20">
+                                <Wallet className="h-4 w-4 text-cyan-400" />
+                            </div>
+                            <Web3Tooltip term="Net Worth">
+                                <p className="text-xs text-muted-foreground uppercase tracking-wider cursor-help">
+                                    Net Worth
+                                </p>
+                            </Web3Tooltip>
                         </div>
-                        <p className="text-3xl font-bold text-success-500">
-                            ${totalSupplied.toFixed(2)}
+                        <p className="text-4xl font-bold tracking-tight bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+                            <CountUp value={netWorth} prefix="$" duration={1.2} />
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground mt-2 opacity-70">
+                            Total portfolio value
+                        </p>
+                    </CardContent>
+                </Card>
+            </motion.div>
+
+            {/* Total Supplied */}
+            <motion.div variants={item}>
+                <Card className={cn(
+                    glassCard,
+                    "group hover:border-emerald-500/30"
+                )}>
+                    <CardContent className="p-5">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="p-2 rounded-lg bg-emerald-500/10 group-hover:bg-emerald-500/20 transition-colors">
+                                <TrendingUp className="h-4 w-4 text-emerald-400" />
+                            </div>
+                            <Web3Tooltip term="Collateral">
+                                <p className="text-xs text-muted-foreground uppercase tracking-wider cursor-help">
+                                    Supplied
+                                </p>
+                            </Web3Tooltip>
+                        </div>
+                        <p className="text-4xl font-bold text-emerald-400 tracking-tight">
+                            <CountUp value={totalSupplied} prefix="$" duration={1.4} />
+                        </p>
+                        <p className="text-xs text-emerald-500/70 mt-2 flex items-center gap-1">
+                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             Earning yield
                         </p>
                     </CardContent>
                 </Card>
+            </motion.div>
 
-                {/* Total Borrowed */}
-                <Card className="p-4 hover:shadow-elevation-2 transition-shadow">
-                    <CardContent className="p-0">
-                        <div className="flex items-center justify-between mb-2">
-                            <p className="text-xs text-muted-foreground">📉 Total Borrowed</p>
+            {/* Total Borrowed */}
+            <motion.div variants={item}>
+                <Card className={cn(
+                    glassCard,
+                    "group hover:border-orange-500/30"
+                )}>
+                    <CardContent className="p-5">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="p-2 rounded-lg bg-orange-500/10 group-hover:bg-orange-500/20 transition-colors">
+                                <TrendingDown className="h-4 w-4 text-orange-400" />
+                            </div>
+                            <Web3Tooltip term="Borrow">
+                                <p className="text-xs text-muted-foreground uppercase tracking-wider cursor-help">
+                                    Borrowed
+                                </p>
+                            </Web3Tooltip>
                         </div>
-                        <p className="text-3xl font-bold text-error-500">
-                            ${totalBorrowed.toFixed(2)}
+                        <p className="text-4xl font-bold text-orange-400 tracking-tight">
+                            <CountUp value={totalBorrowed} prefix="$" duration={1.6} />
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-xs text-orange-500/70 mt-2 flex items-center gap-1">
+                            <span className="inline-block w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
                             Accruing interest
                         </p>
                     </CardContent>
                 </Card>
-            </div>
+            </motion.div>
 
-            {/* Health Factor - Only show if user has borrowed */}
-            {totalBorrowed > 0 && (
+            {/* Health Factor - Always show 4th card */}
+            <motion.div variants={item}>
                 <Card className={cn(
-                    "border-2",
-                    healthFactor >= 2 ? "border-success-500/20 bg-success-500/5" :
-                        healthFactor >= 1.2 ? "border-yellow-500/20 bg-yellow-500/5" :
-                            "border-red-500/20 bg-red-500/5"
+                    glassCard,
+                    "group",
+                    showHealthFactor ? (
+                        healthFactor >= 1.5 ? "border-emerald-500/20" :
+                            healthFactor >= 1.2 ? "border-yellow-500/20" :
+                                "border-red-500/20"
+                    ) : "border-white/5"
                 )}>
-                    <CardContent className="pt-6">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <Web3Tooltip term="Health Factor">
-                                    <span className="text-sm font-medium">Health Factor</span>
-                                </Web3Tooltip>
-                                <span className={cn(
-                                    "text-xs px-2 py-1 rounded-full",
-                                    healthFactor >= 2 ? "bg-success-500/20 text-success-700" :
-                                        healthFactor >= 1.2 ? "bg-yellow-500/20 text-yellow-700" :
-                                            "bg-red-500/20 text-red-700"
-                                )}>
-                                    {getHealthFactorStatus(healthFactor)}
-                                </span>
+                    <CardContent className="p-5">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className={cn(
+                                "p-2 rounded-lg transition-colors",
+                                showHealthFactor
+                                    ? "bg-violet-500/10 group-hover:bg-violet-500/20"
+                                    : "bg-white/5"
+                            )}>
+                                <Activity className={cn(
+                                    "h-4 w-4",
+                                    showHealthFactor ? "text-violet-400" : "text-muted-foreground"
+                                )} />
                             </div>
-                            <div className="text-right">
-                                <p className={cn("text-3xl font-bold", getHealthFactorColor(healthFactor))}>
-                                    {healthFactor.toFixed(2)}
+                            <Web3Tooltip term="Health Factor">
+                                <p className="text-xs text-muted-foreground uppercase tracking-wider cursor-help">
+                                    Health Factor
                                 </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    {healthFactor < 1 ? "⚠️ Liquidation risk" : "Above 1.0 is safe"}
-                                </p>
-                            </div>
+                            </Web3Tooltip>
                         </div>
 
-                        {/* Health Factor Progress Bar */}
-                        <div className="mt-4">
-                            <div className="h-2 bg-muted rounded-full overflow-hidden">
-                                <div
-                                    className={cn(
-                                        "h-full transition-all",
-                                        healthFactor >= 2 ? "bg-success-500" :
-                                            healthFactor >= 1.2 ? "bg-yellow-500" :
-                                                "bg-red-500"
-                                    )}
-                                    style={{ width: `${Math.min((healthFactor / 3) * 100, 100)}%` }}
-                                />
+                        {showHealthFactor ? (
+                            <MiniHealthGauge value={healthFactor} />
+                        ) : (
+                            <div className="space-y-2">
+                                <p className="text-4xl font-bold text-muted-foreground/50 tracking-tight">
+                                    —
+                                </p>
+                                <p className="text-xs text-muted-foreground/50">
+                                    No active borrows
+                                </p>
                             </div>
-                            <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                                <span>0</span>
-                                <span>1.0</span>
-                                <span>2.0</span>
-                                <span>3.0+</span>
-                            </div>
-                        </div>
+                        )}
                     </CardContent>
                 </Card>
-            )}
-        </div>
+            </motion.div>
+        </motion.div>
     );
 }
+
+
 

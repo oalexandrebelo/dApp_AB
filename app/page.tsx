@@ -1,12 +1,9 @@
-import { HeroSection } from "@/components/landing/HeroSection";
-import MouseParticlesLazy from "@/components/ui/MouseParticlesLazy";
-
+import { HeroSectionNew } from "@/components/landing/HeroSectionNew";
 
 export default function Home() {
     return (
         <main className="min-h-screen relative overflow-hidden">
-            <MouseParticlesLazy />
-            <HeroSection />
+            <HeroSectionNew />
         </main>
     );
 }

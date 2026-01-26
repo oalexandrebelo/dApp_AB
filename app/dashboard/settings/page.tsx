@@ -9,9 +9,11 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useState, useEffect } from "react";
-import { Monitor, Shield, DollarSign, Bell, Zap, Download, ArrowLeft } from "lucide-react";
+import { Monitor, Shield, DollarSign, Bell, Zap, Download, ArrowLeft, Settings } from "lucide-react";
 import { useLanguage } from '@/lib/i18n';
 import { useToast } from "@/hooks/use-toast";
+import { ShinyText } from "@/components/react-bits/ShinyText";
+import { motion } from "framer-motion";
 
 export default function SettingsPage() {
     const { t } = useLanguage();
@@ -92,33 +94,70 @@ export default function SettingsPage() {
     };
 
     return (
-        <div className="space-y-8">
+        <motion.div
+            className="space-y-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+        >
             {/* Back Button */}
-            <div className="flex items-center gap-4">
+            <motion.div
+                className="flex items-center gap-4"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.1 }}
+            >
                 <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => router.push('/dashboard')}
-                    className="gap-2"
+                    className="gap-2 hover:bg-white/10 transition-colors"
                 >
                     <ArrowLeft className="h-4 w-4" />
                     Back to Dashboard
                 </Button>
-            </div>
+            </motion.div>
 
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">{t.dashboard.settings_page.title}</h1>
-                <p className="text-muted-foreground">{t.dashboard.settings_page.subtitle}</p>
-            </div>
+            {/* Header with ShinyText */}
+            <motion.div
+                className="space-y-3"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+            >
+                <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-xl bg-slate-500/10 border border-slate-500/20">
+                        <Settings className="h-6 w-6 text-slate-400" />
+                    </div>
+                    <h1 className="text-4xl font-bold tracking-tight">
+                        <ShinyText
+                            text={t.dashboard.settings_page.title}
+                            colors={["#94a3b8", "#cbd5e1", "#e2e8f0"]}
+                            duration={4}
+                        />
+                    </h1>
+                </div>
+                <p className="text-muted-foreground text-lg pl-[60px]">
+                    {t.dashboard.settings_page.subtitle}
+                </p>
 
-            <div className="space-y-6">
+                {/* Gradient Divider */}
+                <div className="h-px bg-gradient-to-r from-slate-500/50 via-slate-500/20 to-transparent ml-[60px]" />
+            </motion.div>
+
+            <motion.div
+                className="space-y-6"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+            >
                 {/* Account Settings */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <DollarSign className="h-5 w-5" />
-                            Account Settings
-                        </CardTitle>
+                        <div className="flex items-center gap-2">
+                            <DollarSign className="h-5 w-5 text-cyan-400" />
+                            <CardTitle>Account Settings</CardTitle>
+                        </div>
                         <CardDescription>
                             Configure transaction defaults and preferences
                         </CardDescription>
@@ -254,10 +293,10 @@ export default function SettingsPage() {
                 {/* Notifications */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Bell className="h-5 w-5" />
-                            Notifications
-                        </CardTitle>
+                        <div className="flex items-center gap-2">
+                            <Bell className="h-5 w-5 text-violet-400" />
+                            <CardTitle>Notifications</CardTitle>
+                        </div>
                         <CardDescription>
                             Manage alert preferences
                         </CardDescription>
@@ -385,7 +424,7 @@ export default function SettingsPage() {
                         Save Settings
                     </Button>
                 </div>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 }

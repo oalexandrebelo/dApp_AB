@@ -318,7 +318,7 @@ export function CrossChainBridgeWidget() {
                 <Button
                     onClick={handleBridge}
                     disabled={!amount || isBridging || !isConnected || warnings.some(w => w.severity === 'high')}
-                    className="w-full h-14 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="w-full h-14 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                     {isBridging ? (
                         <div className="flex items-center gap-2">
